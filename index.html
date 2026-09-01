@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Grégoire Jury--Vermot des Roches — Développeur SaaS &amp; Créateur Digital</title>
+<meta name="description" content="Portfolio de Grégoire Jury--Vermot des Roches : développement SaaS, sites web sur-mesure, design UI/UX et montage / dépannage informatique." />
+<meta name="color-scheme" content="dark" />
+<meta name="theme-color" content="#030303" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23050505'/%3E%3Ctext x='50' y='68' font-size='58' font-family='-apple-system,Helvetica,Arial,sans-serif' font-weight='600' fill='%23f5f5f7' text-anchor='middle'%3EG%3C/text%3E%3C/svg%3E" />
+<link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+<a class="skip-link" href="#main">Aller au contenu</a>
+
+<!-- Grain / texture overlay -->
+<div class="grain" aria-hidden="true"></div>
+
+<!-- Custom glass cursor (desktop only, see JS) -->
+<div class="cursor" aria-hidden="true">
+  <div class="cursor__dot"></div>
+  <div class="cursor__ring"></div>
+</div>
+
+<!-- Scroll progress -->
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<!-- Preloader -->
+<div class="preloader" id="preloader" aria-hidden="true">
+  <div class="preloader__mark">
+    <span class="preloader__letter">G</span><span class="preloader__letter">J</span><span class="preloader__letter">V</span><span class="preloader__letter">D</span><span class="preloader__letter">R</span>
+  </div>
+  <div class="preloader__bar"><span id="preloaderFill"></span></div>
+</div>
+
+<!-- Floating glass nav -->
+<header class="nav nav--on-light" id="siteNav">
+  <div class="nav__inner glass">
+    <a href="#hero" class="nav__logo">GJ<span class="dot">.</span></a>
+    <nav class="nav__links" id="navLinks" aria-label="Navigation principale">
+      <span class="nav__indicator" id="navIndicator" aria-hidden="true"></span>
+      <a href="#hero" class="nav__link is-active" data-nav>Accueil</a>
+      <a href="#about" class="nav__link" data-nav>À propos</a>
+      <a href="#services" class="nav__link" data-nav>Compétences</a>
+      <a href="#projects" class="nav__link" data-nav>Projets</a>
+      <a href="#process" class="nav__link" data-nav>Process</a>
+      <a href="#contact" class="nav__link" data-nav>Contact</a>
+    </nav>
+    <a href="#contact" class="nav__cta btn btn--glass btn--sm">Discutons</a>
+    <button class="nav__burger" id="navBurger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobileMenu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- Mobile menu -->
+<div class="mobile-menu glass" id="mobileMenu">
+  <a href="#hero" data-nav>Accueil</a>
+  <a href="#about" data-nav>À propos</a>
+  <a href="#services" data-nav>Compétences</a>
+  <a href="#projects" data-nav>Projets</a>
+  <a href="#process" data-nav>Process</a>
+  <a href="#contact" data-nav>Contact</a>
+</div>
+
+<main id="main">
+
+  <!-- Le hero n'est épinglé QUE dans ce wrapper : il défile ensuite normalement -->
+  <div class="hero-stack">
+
+  <!-- ============ HERO (centré · nom derrière/devant) ============ -->
+  <section id="hero" class="hero">
+    <div class="hero__stage" id="heroStage">
+
+      <!-- Ligne éditoriale. Le conteneur passe en display:contents au-delà de
+           768px : il ne produit alors aucune boîte et les deux mentions
+           restent positionnées dans les angles comme sur la version bureau. -->
+      <div class="hero__editorial">
+        <span class="hero__meta hero__meta--l" aria-hidden="true">Développeur&nbsp;SaaS<br />&amp; Créateur digital</span>
+        <span class="hero__rule" aria-hidden="true"></span>
+        <span class="hero__meta hero__meta--r" aria-hidden="true">Basé en France<br />Disponible</span>
+      </div>
+
+      <!-- Nom géant : DERRIÈRE la photo sur grand écran, SOUS elle sur mobile
+           (remis dans l'ordre par la propriété order, sans toucher au DOM). -->
+      <h1 class="hero__name" aria-label="Grégoire Jury--Vermot des Roches">
+        <span class="line line--top" data-split>Grégoire</span>
+        <span class="line line--bottom" data-split>Jury&nbsp;Vermot</span>
+      </h1>
+
+      <!-- Photo + pastilles superposées (mobile uniquement). Même remarque que
+           pour .hero__editorial : display:contents au-delà de 768px. -->
+      <div class="hero__media">
+        <div class="hero__portrait">
+          <img
+            src="greg.webp"
+            alt="Portrait noir et blanc de Grégoire Jury--Vermot des Roches, de profil, écouteurs sans fil"
+            class="hero__img"
+            id="heroImg"
+            width="1672"
+            height="941"
+            fetchpriority="high"
+            decoding="async"
+          />
+        </div>
+
+        <span class="hero__badge" aria-hidden="true">
+          <svg class="hero__badge-ring" viewBox="0 0 120 120" focusable="false">
+            <defs>
+              <path id="heroBadgeArc" fill="none"
+                d="M60,60 m-44,0 a44,44 0 1,1 88,0 a44,44 0 1,1 -88,0" />
+            </defs>
+            <!-- textLength fixé sur la circonférence (2·pi·44 = 276.46) : le
+                 texte fait exactement le tour, quelle que soit la police. -->
+            <text>
+              <textPath href="#heroBadgeArc" startOffset="0"
+                textLength="276.46" lengthAdjust="spacing">DESIGN · CODE · CRÉATION ·</textPath>
+            </text>
+          </svg>
+          <span class="hero__badge-arrow">↗</span>
+        </span>
+
+        <span class="hero__pill" aria-hidden="true">
+          <span class="hero__pill-dot"></span>Disponible pour de nouveaux projets
+        </span>
+      </div>
+
+      <p class="hero__baseline">Des idées en solutions digitales</p>
+
+      <div class="hero__foot">
+        <div class="hero__cta" data-reveal>
+          <a href="#services" class="btn btn--glass-dark">Voir mes compétences<span class="btn__arrow" aria-hidden="true">↗</span></a>
+          <a href="#contact" class="btn btn--ghost-dark">Me contacter<span class="btn__arrow" aria-hidden="true">→</span></a>
+        </div>
+      </div>
+
+      <a href="#about" class="hero__scroll" aria-label="Défiler vers la section suivante">
+        <span class="hero__scroll-text">Scroller<br />pour découvrir</span>
+        <span class="hero__scroll-btn" aria-hidden="true">↓</span>
+      </a>
+
+    </div>
+
+    <a href="#about" class="scroll-cue scroll-cue--dark" aria-label="Défiler vers le bas">
+      <span class="scroll-cue__track"><span class="scroll-cue__dot"></span></span>
+      Scroll
+    </a>
+  </section>
+
+  <!-- ============ PANEL 1 : Marquee + À propos (volet qui monte sur le hero) ============ -->
+  <div class="panel panel--cover">
+
+  <!-- ============ MARQUEE ============ -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee__track">
+      <span>SAAS</span><span>·</span><span>WEB CUSTOM</span><span>·</span><span>DESIGN</span><span>·</span><span>HARDWARE</span><span>·</span>
+      <span>SAAS</span><span>·</span><span>WEB CUSTOM</span><span>·</span><span>DESIGN</span><span>·</span><span>HARDWARE</span><span>·</span>
+      <span>SAAS</span><span>·</span><span>WEB CUSTOM</span><span>·</span><span>DESIGN</span><span>·</span><span>HARDWARE</span><span>·</span>
+    </div>
+  </div>
+
+  <!-- ============ ABOUT ============ -->
+  <section id="about" class="about section">
+    <div class="section__head" data-title-drop>
+      <p class="eyebrow">
+        <span class="tl-mask"><span class="tl-mask__inner">01 — À propos</span></span>
+      </p>
+      <h2 class="title-lg">
+        <span class="tl-mask"><span class="tl-mask__inner">Je conçois,</span></span>
+        <span class="tl-mask"><span class="tl-mask__inner">je code,</span></span>
+        <span class="tl-mask"><span class="tl-mask__inner">je répare.</span></span>
+      </h2>
+    </div>
+
+    <div class="about__grid">
+      <div class="about__portrait glass" data-reveal data-tilt>
+        <img src="assets/img/ecole.webp" alt="" aria-hidden="true" width="1307" height="981" loading="lazy" decoding="async" />
+      </div>
+
+      <div class="about__text" data-reveal-text>
+        <p>
+          Passionné d'informatique depuis toujours, j'aide particuliers et entreprises à transformer
+          une idée en produit concret&nbsp;: une <strong>application SaaS qui tourne</strong>, un
+          <strong>site qui convertit</strong>, une <strong>identité visuelle qui marque</strong>, ou
+          tout simplement une <strong>machine qui refonctionne enfin</strong> comme elle devrait.
+        </p>
+        <p>
+          Mon approche tient en un mot&nbsp;: <strong>exigence</strong>. Du premier croquis à la
+          dernière ligne de code, jusqu'à la dernière vis serrée sur un boîtier —
+          <strong>chaque détail compte</strong>.
+        </p>
+      </div>
+
+      <!-- Ajuste ces chiffres à ta réalité -->
+      <dl class="stats">
+        <div class="stats__item" data-reveal>
+          <dt class="stats__num" data-count="5" data-suffix="+">0</dt>
+          <dd>Années de passion</dd>
+        </div>
+        <div class="stats__item" data-reveal>
+          <dt class="stats__num" data-count="30" data-suffix="+">0</dt>
+          <dd>Projets réalisés</dd>
+        </div>
+        <div class="stats__item" data-reveal>
+          <dt class="stats__num" data-count="50" data-suffix="+">0</dt>
+          <dd>PC montés &amp; dépannés</dd>
+        </div>
+        <div class="stats__item" data-reveal>
+          <dt class="stats__num" data-count="100" data-suffix="%">0</dt>
+          <dd>Satisfaction client</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+  </div>
+
+  </div><!-- /hero-stack : se referme juste après À propos, qui redevient un
+  bloc de flux normal (plus de "room" de sticky à combler) — le tambour qui
+  suit défile donc normalement, sans le figer ni le recouvrir. -->
+
+  <!-- ============ PANEL : Domaines (tambour 3D, l'élément centré ressort) ============
+       Juste après À propos, en flux normal : pas de figeage, pas de recouvrement. -->
+  <div class="panel">
+    <section id="domains" class="domains">
+      <div class="domains__sticky">
+        <div class="domains__cylinder">
+          <ul class="domains__list">
+        <li class="domains__item">Développement SaaS</li>
+        <li class="domains__item">React&nbsp;/ Next.js</li>
+        <li class="domains__item">Node.js</li>
+        <li class="domains__item">Cloud &amp; déploiement</li>
+        <li class="domains__item">Sites Web Custom</li>
+        <li class="domains__item">Design responsive</li>
+        <li class="domains__item">Performance &amp; SEO</li>
+        <li class="domains__item">Design UI/UX</li>
+        <li class="domains__item">Figma</li>
+        <li class="domains__item">Identité visuelle</li>
+        <li class="domains__item">Design system</li>
+        <li class="domains__item">Montage &amp; Dépannage PC</li>
+        <li class="domains__item">Diagnostic matériel</li>
+        <li class="domains__item">Optimisation</li>
+        <li class="domains__item">Maintenance</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Réserve la distance de scroll pendant laquelle le panneau Compétences
+       arrive de la droite (fenêtre en position: fixed pilotée par JS) -->
+  <div class="hslide-spacer" aria-hidden="true"></div>
+
+  <!-- ============ PANEL 2 : Compétences (fenêtre claire qui arrive de la droite au scroll) ============ -->
+  <div class="hslide">
+  <div class="panel panel--light">
+  <section id="services" class="services section">
+    <span class="services__ghost" aria-hidden="true" id="servicesGhost">Expertises</span>
+    <div class="section__head">
+      <p class="eyebrow" data-reveal>02 — Compétences</p>
+      <h2 class="title-lg" data-split-right>Quatre expertises,<br />un seul interlocuteur.</h2>
+    </div>
+
+    <div class="services__grid">
+      <article class="service-card" data-svc data-tilt>
+        <div class="service-card__icon">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M24 6 4 16l20 10 20-10-20-10Z" stroke-linejoin="round"/><path d="M4 24l20 10 20-10" stroke-linejoin="round"/><path d="M4 32l20 10 20-10" stroke-linejoin="round"/></svg>
+        </div>
+        <h3>Développement SaaS</h3>
+        <p>Applications web sur-mesure : authentification, bases de données, paiements, tableaux de bord — de l'idée au déploiement cloud scalable.</p>
+        <ul class="service-card__tags">
+          <li>React / Next.js</li><li>Node.js</li><li>API &amp; Bases de données</li><li>Cloud &amp; déploiement</li>
+        </ul>
+      </article>
+
+      <article class="service-card" data-svc data-tilt>
+        <div class="service-card__icon">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 14 4 24l12 10" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 14l12 10-12 10" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 8 20 40" stroke-linecap="round"/></svg>
+        </div>
+        <h3>Sites Web Custom</h3>
+        <p>Sites vitrines &amp; e-commerce pensés sur-mesure, sans templates génériques. Rapides, responsives, optimisés SEO.</p>
+        <ul class="service-card__tags">
+          <li>Design responsive</li><li>Performance</li><li>SEO</li><li>Animations</li>
+        </ul>
+      </article>
+
+      <article class="service-card" data-svc data-tilt>
+        <div class="service-card__icon">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 42 26 22" stroke-linecap="round"/><path d="M26 22 36 12a4 4 0 1 1 6 6L32 28l-10 4 4-10Z" stroke-linejoin="round" stroke-linecap="round"/></svg>
+        </div>
+        <h3>Design UI/UX</h3>
+        <p>Direction artistique, identité visuelle, interfaces claires et systèmes de composants cohérents — noir, blanc, et de l'espace.</p>
+        <ul class="service-card__tags">
+          <li>Figma</li><li>Identité visuelle</li><li>Prototypage</li><li>Design system</li>
+        </ul>
+      </article>
+
+      <article class="service-card" data-svc data-tilt>
+        <div class="service-card__icon">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="14" y="14" width="20" height="20" rx="2"/><path d="M20 14V6M28 14V6M20 42v-8M28 42v-8M14 20H6M14 28H6M42 20h-8M42 28h-8" stroke-linecap="round"/></svg>
+        </div>
+        <h3>Montage &amp; Dépannage PC</h3>
+        <p>Configurations sur-mesure, optimisation des performances, diagnostic matériel &amp; logiciel, refroidissement custom.</p>
+        <ul class="service-card__tags">
+          <li>Assemblage</li><li>Diagnostic</li><li>Optimisation</li><li>Maintenance</li>
+        </ul>
+      </article>
+    </div>
+
+    <!-- Barres de compétences "liquides" -->
+    <div class="skillbars" data-reveal>
+      <h3 class="skillbars__title">Stack &amp; outils</h3>
+      <div class="skillbar">
+        <div class="skillbar__label"><span>Développement Web</span><span class="skillbar__pct">90%</span></div>
+        <div class="skillbar__track"><div class="skillbar__fill" data-fill="90"></div></div>
+      </div>
+      <div class="skillbar">
+        <div class="skillbar__label"><span>SaaS &amp; Cloud</span><span class="skillbar__pct">85%</span></div>
+        <div class="skillbar__track"><div class="skillbar__fill" data-fill="85"></div></div>
+      </div>
+      <div class="skillbar">
+        <div class="skillbar__label"><span>Design UI/UX</span><span class="skillbar__pct">80%</span></div>
+        <div class="skillbar__track"><div class="skillbar__fill" data-fill="80"></div></div>
+      </div>
+      <div class="skillbar">
+        <div class="skillbar__label"><span>Hardware &amp; Dépannage</span><span class="skillbar__pct">95%</span></div>
+        <div class="skillbar__track"><div class="skillbar__fill" data-fill="95"></div></div>
+      </div>
+    </div>
+  </section>
+  </div>
+  </div><!-- /hslide -->
+
+  <!-- ============ PANEL 3 : Projets (zoom montant) ============ -->
+  <div class="panel" data-panim="zoom">
+  <section id="projects" class="projects section">
+    <div class="section__head">
+      <p class="eyebrow" data-reveal>03 — Projets</p>
+      <h2 class="title-lg" data-reveal>Une sélection<br />de réalisations.</h2>
+    </div>
+
+    <div class="projects__grid">
+      <a href="https://kairomod.fr" target="_blank" rel="noopener" class="project-card glass" data-reveal data-tilt>
+        <div class="project-card__media">
+          <img src="assets/img/projects/kairomod.webp" alt="Aperçu du site KaïroMod" width="1104" height="710" loading="lazy" decoding="async" />
+        </div>
+        <div class="project-card__body">
+          <span class="chip">E-commerce</span>
+          <h3>KaïroMod — Montres sur-mesure</h3>
+          <p>Configurateur interactif pour personnaliser des montres Seiko Mod assemblées à la main : boîtier, cadran, bracelet, verre saphir, suivi de commande et espace client.</p>
+          <span class="project-card__link">Voir le site <i>&rarr;</i></span>
+        </div>
+      </a>
+
+      <a href="https://charlesmds.fr" target="_blank" rel="noopener" class="project-card glass" data-reveal data-tilt>
+        <div class="project-card__media">
+          <img src="assets/img/projects/charlesmds.webp" alt="Aperçu du site de Charles Machado, coach sportif" width="1104" height="710" loading="lazy" decoding="async" />
+        </div>
+        <div class="project-card__body">
+          <span class="chip">Web</span>
+          <h3>Charles Machado — Coach sportif</h3>
+          <p>Site vitrine pour un coach certifié BPJEPS : programmes de remise en forme, réservation d'appel découverte, galerie de transformations et espace client.</p>
+          <span class="project-card__link">Voir le site <i>&rarr;</i></span>
+        </div>
+      </a>
+
+      <a href="https://gregjvdr.github.io/Harmonie-Remake/" target="_blank" rel="noopener" class="project-card glass project-card--wide" data-reveal data-tilt>
+        <div class="project-card__media">
+          <img src="assets/img/projects/harmonie.webp" alt="Aperçu du site de l'Harmonie Fanfare Rudipontaine" width="1104" height="710" loading="lazy" decoding="async" />
+        </div>
+        <div class="project-card__body">
+          <span class="chip">Web</span>
+          <h3>Harmonie Fanfare Rudipontaine</h3>
+          <p>Refonte du site d'une association musicale fondée en 1922&nbsp;: présentation de l'orchestre, agenda des concerts, école de musique et historique du centenaire.</p>
+          <span class="project-card__link">Voir le site <i>&rarr;</i></span>
+        </div>
+      </a>
+    </div>
+  </section>
+  </div>
+
+  <!-- ============ PANEL 4 : Process (balayage depuis la droite) ============ -->
+  <div class="panel" data-panim="wipe-right">
+  <section id="process" class="process section">
+    <div class="section__head">
+      <p class="eyebrow" data-reveal>04 — Process</p>
+      <h2 class="title-lg" data-reveal>Une méthode claire,<br />du brief à la livraison.</h2>
+    </div>
+
+    <ol class="timeline">
+      <li class="timeline__item" data-reveal>
+        <span class="timeline__num">01</span>
+        <div class="timeline__card glass">
+          <h3>Écoute &amp; analyse</h3>
+          <p>On cadre le besoin réel, les objectifs et les contraintes techniques ou budgétaires.</p>
+        </div>
+      </li>
+      <li class="timeline__item" data-reveal>
+        <span class="timeline__num">02</span>
+        <div class="timeline__card glass">
+          <h3>Design &amp; prototype</h3>
+          <p>Maquettes, direction artistique et expérience utilisateur, validées avant tout développement.</p>
+        </div>
+      </li>
+      <li class="timeline__item" data-reveal>
+        <span class="timeline__num">03</span>
+        <div class="timeline__card glass">
+          <h3>Développement</h3>
+          <p>Code propre, performant et évolutif — ou montage &amp; configuration matérielle rigoureuse.</p>
+        </div>
+      </li>
+      <li class="timeline__item" data-reveal>
+        <span class="timeline__num">04</span>
+        <div class="timeline__card glass">
+          <h3>Livraison &amp; support</h3>
+          <p>Déploiement, formation à l'usage, puis maintenance et dépannage sur la durée.</p>
+        </div>
+      </li>
+    </ol>
+  </section>
+  </div>
+
+  <!-- ============ PANEL 5 : Contact (ouverture en iris) ============ -->
+  <div class="panel panel--last" data-panim="iris">
+  <section id="contact" class="contact section">
+    <div class="contact__panel" data-reveal data-tilt>
+      <!-- Vraie texture de verre (glasses.png), panoramique lent continu -->
+      <div class="contact__bg" aria-hidden="true"></div>
+      <div class="contact__glow" aria-hidden="true"></div>
+
+      <div class="contact__inner">
+        <p class="contact__status" data-reveal>
+          <span class="contact__status-dot"></span>Disponible pour de nouveaux projets
+        </p>
+
+        <div class="contact__head" data-title-drop>
+          <p class="eyebrow">
+            <span class="tl-mask"><span class="tl-mask__inner">05 — Contact</span></span>
+          </p>
+          <h2 class="title-lg">
+            <span class="tl-mask"><span class="tl-mask__inner">Un projet en tête&nbsp;?</span></span>
+            <span class="tl-mask"><span class="tl-mask__inner">Discutons-en.</span></span>
+          </h2>
+        </div>
+
+        <p class="contact__text" data-reveal-text>
+          <strong>SaaS</strong>, <strong>site web</strong>, <strong>identité visuelle</strong> ou
+          <strong>PC en panne</strong> — écrivez-moi, je réponds rapidement.
+        </p>
+
+        <!-- Remplace l'e-mail ci-dessous si besoin -->
+        <a href="mailto:gregjvdr@gmail.com" class="btn btn--glass btn--lg contact__cta">
+          <span data-scramble>gregjvdr@gmail.com</span>
+          <svg class="contact__cta-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+
+        <div class="contact__socials">
+          <a href="https://www.linkedin.com/in/gregjvdr/" target="_blank" rel="noopener" aria-label="LinkedIn" class="social-btn glass" data-reveal>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5ZM.24 8.25h4.5V23H.24V8.25ZM8.5 8.25h4.32v2.02h.06c.6-1.14 2.07-2.34 4.26-2.34 4.56 0 5.4 3 5.4 6.9V23h-4.5v-6.98c0-1.67-.03-3.8-2.32-3.8-2.33 0-2.69 1.82-2.69 3.7V23H8.5V8.25Z"/></svg>
+          </a>
+          <a href="https://github.com/GregJVDR" target="_blank" rel="noopener" aria-label="GitHub" class="social-btn glass" data-reveal>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.73.5.5 5.73.5 12c0 5.08 3.29 9.39 7.86 10.91.57.1.78-.25.78-.55v-2.15c-3.2.7-3.88-1.36-3.88-1.36-.52-1.34-1.28-1.7-1.28-1.7-1.04-.72.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.75 2.7 1.25 3.35.96.1-.75.4-1.25.73-1.54-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.24 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.7 5.4-5.27 5.69.42.36.78 1.08.78 2.17v3.22c0 .3.21.66.79.55A10.52 10.52 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5Z"/></svg>
+          </a>
+          <a href="https://www.instagram.com/greg.jvdr/" target="_blank" rel="noopener" aria-label="Instagram" class="social-btn glass" data-reveal>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.7 3.7 0 0 1-1.38-.9 3.7 3.7 0 0 1-.9-1.38c-.16-.42-.36-1.06-.41-2.23-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41 1.27-.06 1.65-.07 4.85-.07ZM12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63c-.8.31-1.47.72-2.14 1.39A5.9 5.9 0 0 0 .6 4.14C.3 4.9.1 5.78.05 7.05 0 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91.31.8.72 1.47 1.39 2.14a5.9 5.9 0 0 0 2.14 1.39c.76.3 1.64.5 2.91.56C8.33 24 8.74 24 12 24s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56.8-.31 1.47-.72 2.14-1.39a5.9 5.9 0 0 0 1.39-2.14c.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91a5.9 5.9 0 0 0-1.39-2.14A5.9 5.9 0 0 0 19.86.63c-.76-.3-1.64-.5-2.91-.56C15.67.01 15.26 0 12 0Zm0 5.84A6.16 6.16 0 1 0 12 18.16 6.16 6.16 0 0 0 12 5.84Zm0 10.16a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm6.41-10.4a1.44 1.44 0 1 1-2.88 0 1.44 1.44 0 0 1 2.88 0Z"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+  </div>
+
+</main>
+
+<footer class="footer">
+  <div class="footer__grid">
+    <div class="footer__brand" data-reveal>
+      <a href="#hero" class="footer__logo">GJ<span class="dot">.</span></a>
+      <p class="footer__tag">Développeur SaaS &amp; créateur digital.<br />Je conçois, je code, je répare.</p>
+    </div>
+
+    <nav class="footer__col" aria-label="Plan du site" data-reveal>
+      <h3>Navigation</h3>
+      <a href="#hero" data-scramble>Accueil</a>
+      <a href="#about" data-scramble>À propos</a>
+      <a href="#services" data-scramble>Compétences</a>
+      <a href="#projects" data-scramble>Projets</a>
+      <a href="#process" data-scramble>Process</a>
+      <a href="#contact" data-scramble>Contact</a>
+    </nav>
+
+    <div class="footer__col" data-reveal>
+      <h3>Réseaux</h3>
+      <a href="https://www.linkedin.com/in/gregjvdr/" target="_blank" rel="noopener" data-scramble>LinkedIn</a>
+      <a href="https://github.com/GregJVDR" target="_blank" rel="noopener" data-scramble>GitHub</a>
+      <a href="https://www.instagram.com/greg.jvdr/" target="_blank" rel="noopener" data-scramble>Instagram</a>
+    </div>
+
+    <div class="footer__col" data-reveal>
+      <h3>Contact</h3>
+      <a href="mailto:gregjvdr@gmail.com" data-scramble>gregjvdr@gmail.com</a>
+      <span>France</span>
+      <span>Réponse sous 24&nbsp;h</span>
+    </div>
+  </div>
+
+  <div class="footer__watermark" aria-hidden="true" data-reveal>Grégoire</div>
+
+  <div class="footer__bottom">
+    <p>&copy; <span id="year"></span> Grégoire Jury--Vermot des Roches. Tous droits réservés.</p>
+    <a href="#hero" class="back-to-top glass" aria-label="Retour en haut">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+  </div>
+</footer>
+
+<script src="assets/js/smooth-scroll.js"></script>
+<script src="assets/js/main.js"></script>
+</body>
+</html>
