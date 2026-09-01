@@ -715,6 +715,27 @@ html.js .nav:not(.nav--in) {
   text-align: center;
 }
 .hero__cta { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+/* Entrée au chargement, jamais liée au scroll : ces boutons sont au-dessus de
+   la ligne de flottaison. Ils portaient [data-reveal], dont l'observer mesure
+   la boîte TRANSFORMÉE (translateY(44px)) ; combinée au rootMargin négatif de
+   -8%, cette boîte tombait sous la racine d'observation, si bien que les
+   boutons n'apparaissaient qu'après un scroll — et jamais du tout sur grand
+   écran, le hero étant sticky. `backwards` les laisse visibles si l'animation
+   ne joue pas du tout. */
+.hero__cta { animation: heroCtaIn .75s var(--ease) .55s backwards; }
+@keyframes heroCtaIn { from { opacity: 0; transform: translateY(22px); } }
+@media (prefers-reduced-motion: reduce) { .hero__cta { animation: none; } }
+
+/* Flèches en SVG et non en caractères Unicode : ↗ (U+2197) et ↓ (U+2193)
+   appartiennent au jeu emoji, et Android leur applique la présentation emoji
+   par défaut — les flèches devenaient des pictogrammes colorés. Le SVG hérite
+   de currentColor et se dimensionne en em, donc rien d'autre ne change. */
+.icon-arrow {
+  display: block;
+  flex: none;
+  width: 1em;
+  height: 1em;
+}
 
 .word {
   display: inline-block;
@@ -1011,7 +1032,7 @@ html.js .nav:not(.nav--in) {
     font-size: clamp(.92rem, 3.9vw, 1.02rem);
     border-radius: var(--radius-pill);
   }
-  .btn__arrow { display: inline; font-size: 1.05em; line-height: 1; }
+  .btn__arrow { display: inline-flex; align-items: center; font-size: 1.15em; }
   /* bouton principal : noir plein, texte crème */
   .hero__cta .btn--glass-dark {
     background: var(--ink);
@@ -1619,6 +1640,9 @@ html.js .panel--light [data-svc].is-in {
   transition: gap .3s ease;
 }
 .project-card:hover .project-card__link { gap: 14px; }
+/* même raison que les flèches du hero : caractère Unicode remplacé par un
+   SVG, pour un rendu identique sur toutes les plateformes */
+.project-card__arrow { display: inline-flex; font-size: 1.05em; }
 .project-card:hover {
   transform: translateY(-6px);
   border-color: rgba(255, 255, 255, .28);
