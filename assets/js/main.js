@@ -678,21 +678,41 @@
     let ringX = mouseX;
     let ringY = mouseY;
 
-    window.addEventListener("mousemove", (e) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-      dot.style.left = mouseX + "px";
-      dot.style.top = mouseY + "px";
-    });
+    // Position posée en transform, pas en left/top : ces deux propriétés
+    // relayoutent la page à chaque frame. Le -50% reproduit le centrage que
+    // le CSS appliquait, qu'on écrase ici.
+    // scale() reprend --ring-scale (interpolée en CSS) : l'anneau grossit au
+    // survol sans toucher à width/height, qui relayouteraient. Le repli à 1
+    // garde le curseur fonctionnel si @property n'est pas gérée.
+    const place = (el, x, y) =>
+      (el.style.transform =
+        `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) translate(-50%, -50%) scale(var(--ring-scale, 1))`);
 
+    let loopId = null;
     const loop = () => {
       ringX += (mouseX - ringX) * 0.16;
       ringY += (mouseY - ringY) * 0.16;
-      ring.style.left = ringX + "px";
-      ring.style.top = ringY + "px";
-      requestAnimationFrame(loop);
+      place(ring, ringX, ringY);
+      // La boucle tournait indéfiniment, y compris souris immobile et anneau
+      // déjà arrivé. On l'arrête une fois l'écart négligeable ; le prochain
+      // mouvement la relance.
+      if (Math.abs(mouseX - ringX) < 0.1 && Math.abs(mouseY - ringY) < 0.1) {
+        place(ring, mouseX, mouseY);
+        loopId = null;
+        return;
+      }
+      loopId = requestAnimationFrame(loop);
     };
-    requestAnimationFrame(loop);
+
+    window.addEventListener("mousemove", (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      place(dot, mouseX, mouseY);
+      if (loopId === null) loopId = requestAnimationFrame(loop);
+    });
+
+    place(dot, mouseX, mouseY);
+    place(ring, ringX, ringY);
 
     document.querySelectorAll("a, button, [data-tilt]").forEach((el) => {
       el.addEventListener("mouseenter", () => cursor.classList.add("is-active"));
@@ -708,6 +728,7 @@
     document.querySelectorAll("[data-tilt]").forEach((card) => {
       let raf = null;
       let rect = null;
+      let settle = null;
       let lastX = 0;
       let lastY = 0;
 
@@ -725,9 +746,13 @@
         // synchrone, soit des dizaines de layouts par seconde pendant tout le
         // survol — la principale source du retard ressenti.
         rect = card.getBoundingClientRect();
-        // .is-tilting coupe la transition : la carte doit coller au curseur,
-        // pas l'interpoler avec 180ms de retard.
-        card.classList.add("is-tilting");
+        // .is-tilting n'est PAS posée tout de suite : elle coupe la transition,
+        // et la carte basculerait alors d'un coup sous le pointeur dès la
+        // première frame. On laisse d'abord la transition CSS amener
+        // l'inclinaison en douceur, puis on passe au suivi direct une fois
+        // qu'elle est arrivée — entrée douce, puis collée au curseur.
+        clearTimeout(settle);
+        settle = setTimeout(() => card.classList.add("is-tilting"), 340);
       });
 
       card.addEventListener("mousemove", (e) => {
@@ -742,6 +767,7 @@
           cancelAnimationFrame(raf);
           raf = null;
         }
+        clearTimeout(settle);
         rect = null;
         // la transition reprend pour le retour à plat, puis le CSS
         // (:hover lift, reveal) récupère la main

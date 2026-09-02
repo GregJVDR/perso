@@ -294,21 +294,40 @@ body {
 
 /* ---------- Cursor ---------- */
 .cursor { position: fixed; inset: 0; pointer-events: none; z-index: 9999; }
-.cursor__dot, .cursor__ring { position: fixed; top: 0; left: 0; border-radius: 50%; transform: translate(-50%, -50%); }
+/* top/left figés à 0 : la position est portée par un transform posé en JS
+   (voir main.js), qui reste sur le compositeur au lieu de relayouter. */
+.cursor__dot, .cursor__ring {
+  position: fixed; top: 0; left: 0;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+}
 .cursor__dot {
   width: 8px; height: 8px;
   background: var(--white);
   mix-blend-mode: difference;
+}
+/* --ring-scale est déclarée pour pouvoir être interpolée : sans @property,
+   une propriété personnalisée saute d'une valeur à l'autre sans transition. */
+@property --ring-scale {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
 }
 .cursor__ring {
   width: 42px; height: 42px;
   border: 1px solid rgba(255,255,255,.5);
   background: rgba(255,255,255,.04);
   backdrop-filter: blur(4px);
-  transition: width .35s var(--ease-glass), height .35s var(--ease-glass), border-color .35s ease, background .35s ease;
+  /* L'anneau grossissait en animant width/height, deux propriétés de mise en
+     page : chaque entrée sur un lien ou une carte relayoutait la page pendant
+     350 ms — précisément au moment du survol. On met à l'échelle à la place,
+     via une variable reprise dans le transform posé par le JS. */
+  --ring-scale: 1;
+  transition: --ring-scale .35s var(--ease-glass), border-color .35s ease, background .35s ease;
 }
 .cursor.is-active .cursor__ring {
-  width: 70px; height: 70px;
+  --ring-scale: 1.667;
   border-color: rgba(255,255,255,.8);
   background: rgba(255,255,255,.08);
 }
@@ -1659,7 +1678,12 @@ html.js .panel--light [data-svc].is-in {
   object-position: top;
   filter: grayscale(1) contrast(1.05);
   transform: scale(1.02);
-  transition: filter .6s var(--ease-glass), transform .6s var(--ease-glass);
+  /* courbe volontairement douce au démarrage : --ease-glass part à très
+     grande vitesse, ce qui rendait la mise en couleur brutale à l'instant
+     précis où le pointeur entrait sur la carte */
+  transition:
+    filter .85s cubic-bezier(.33, .12, .2, 1),
+    transform .85s cubic-bezier(.33, .12, .2, 1);
   /* couche GPU pré-promue : évite la saccade du premier survol */
   will-change: transform, filter;
 }
@@ -1673,9 +1697,12 @@ html.js .panel--light [data-svc].is-in {
 .project-card__link {
   display: inline-flex; align-items: center; gap: 8px;
   font-size: .88rem; font-weight: 600;
-  transition: gap .3s ease;
 }
-.project-card:hover .project-card__link { gap: 14px; }
+/* La flèche glisse par transform et non par `gap` : animer `gap` est une
+   animation de mise en page — mesuré, 37 layouts par survol. Le rendu est
+   identique, mais tout reste sur le compositeur. */
+.project-card__arrow { transition: transform .4s var(--ease-glass); }
+.project-card:hover .project-card__arrow { transform: translateX(6px); }
 /* même raison que les flèches du hero : caractère Unicode remplacé par un
    SVG, pour un rendu identique sur toutes les plateformes */
 .project-card__arrow { display: inline-flex; font-size: 1.05em; }
