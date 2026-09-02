@@ -243,6 +243,26 @@
       .join("");
   });
 
+  /* ---------------- Suspension des animations hors écran ----------------
+     Les animations décoratives en boucle (bandeau défilant, jauges de
+     compétences, fond et halo de Contact) tournaient en permanence, y compris
+     très loin de l'écran : mesuré, 8 des 18 animations actives étaient hors
+     champ. Chacune coûte un recalcul de style par frame, pour rien.
+     On les met en pause tant que leur section n'est pas approchée. La marge
+     d'un écran garantit qu'elles ont repris avant d'être visibles. */
+  const animatedDecor = document.querySelectorAll("[data-anim-pause]");
+  if (animatedDecor.length && "IntersectionObserver" in window) {
+    const ioAnim = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          entry.target.classList.toggle("anim-paused", !entry.isIntersecting);
+        });
+      },
+      { rootMargin: "100% 0px 100% 0px" }
+    );
+    animatedDecor.forEach((el) => ioAnim.observe(el));
+  }
+
   /* ---------------- Scroll reveal (IntersectionObserver) ----------------
      Rejoue à chaque passage, dans les deux sens : on bascule .in-view selon
      l'intersection au lieu de l'ajouter une fois puis d'unobserve. */
@@ -687,20 +707,45 @@
   if (isFinePointer && !reduceMotion) {
     document.querySelectorAll("[data-tilt]").forEach((card) => {
       let raf = null;
-      card.addEventListener("mousemove", (e) => {
-        const rect = card.getBoundingClientRect();
-        const px = (e.clientX - rect.left) / rect.width - 0.5;
-        const py = (e.clientY - rect.top) / rect.height - 0.5;
-        // spotlight (utilisé par les cartes du panneau clair)
-        card.style.setProperty("--sx", ((px + 0.5) * 100).toFixed(1) + "%");
-        card.style.setProperty("--sy", ((py + 0.5) * 100).toFixed(1) + "%");
-        if (raf) cancelAnimationFrame(raf);
-        raf = requestAnimationFrame(() => {
-          card.style.transform = `perspective(900px) rotateX(${-py * 6}deg) rotateY(${px * 8}deg) translateY(-4px)`;
-        });
+      let rect = null;
+      let lastX = 0;
+      let lastY = 0;
+
+      const apply = () => {
+        raf = null;
+        card.style.transform =
+          `perspective(900px) rotateX(${-lastY * 6}deg) rotateY(${lastX * 8}deg) translateY(-4px)`;
+        card.style.setProperty("--sx", ((lastX + 0.5) * 100).toFixed(1) + "%");
+        card.style.setProperty("--sy", ((lastY + 0.5) * 100).toFixed(1) + "%");
+      };
+
+      card.addEventListener("mouseenter", () => {
+        // Rectangle mesuré une seule fois à l'entrée. Il était relu à CHAQUE
+        // mousemove : getBoundingClientRect force un calcul de mise en page
+        // synchrone, soit des dizaines de layouts par seconde pendant tout le
+        // survol — la principale source du retard ressenti.
+        rect = card.getBoundingClientRect();
+        // .is-tilting coupe la transition : la carte doit coller au curseur,
+        // pas l'interpoler avec 180ms de retard.
+        card.classList.add("is-tilting");
       });
+
+      card.addEventListener("mousemove", (e) => {
+        if (!rect) rect = card.getBoundingClientRect();
+        lastX = (e.clientX - rect.left) / rect.width - 0.5;
+        lastY = (e.clientY - rect.top) / rect.height - 0.5;
+        if (raf === null) raf = requestAnimationFrame(apply);
+      });
+
       card.addEventListener("mouseleave", () => {
-        // rend la main au CSS (:hover lift, reveal) au lieu de figer un transform inline
+        if (raf !== null) {
+          cancelAnimationFrame(raf);
+          raf = null;
+        }
+        rect = null;
+        // la transition reprend pour le retour à plat, puis le CSS
+        // (:hover lift, reveal) récupère la main
+        card.classList.remove("is-tilting");
         card.style.transform = "";
       });
     });

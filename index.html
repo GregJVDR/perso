@@ -106,6 +106,10 @@
         </div>
 
         <span class="hero__badge" aria-hidden="true">
+          <!-- La rotation est portée par cette enveloppe et non par le <svg> :
+               transformer une racine SVG contenant un <textPath> force le
+               navigateur à recalculer la mise en page du texte à chaque frame. -->
+          <span class="hero__badge-spin">
           <svg class="hero__badge-ring" viewBox="0 0 120 120" focusable="false">
             <defs>
               <path id="heroBadgeArc" fill="none"
@@ -118,6 +122,7 @@
                 textLength="276.46" lengthAdjust="spacing">DESIGN · CODE · CRÉATION ·</textPath>
             </text>
           </svg>
+          </span>
           <span class="hero__badge-arrow"><svg class="icon-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.4 11.6 11.6 4.4M6.2 4.4h5.4v5.4"/></svg></span>
         </span>
 
@@ -152,7 +157,7 @@
   <div class="panel panel--cover">
 
   <!-- ============ MARQUEE ============ -->
-  <div class="marquee" aria-hidden="true">
+  <div class="marquee" aria-hidden="true" data-anim-pause>
     <div class="marquee__track">
       <span>SAAS</span><span>·</span><span>WEB CUSTOM</span><span>·</span><span>DESIGN</span><span>·</span><span>HARDWARE</span><span>·</span>
       <span>SAAS</span><span>·</span><span>WEB CUSTOM</span><span>·</span><span>DESIGN</span><span>·</span><span>HARDWARE</span><span>·</span>
@@ -308,7 +313,7 @@
     </div>
 
     <!-- Barres de compétences "liquides" -->
-    <div class="skillbars" data-reveal>
+    <div class="skillbars" data-reveal data-anim-pause>
       <h3 class="skillbars__title">Stack &amp; outils</h3>
       <div class="skillbar">
         <div class="skillbar__label"><span>Développement Web</span><span class="skillbar__pct">90%</span></div>
@@ -342,7 +347,7 @@
     <div class="projects__grid">
       <a href="https://kairomod.fr" target="_blank" rel="noopener" class="project-card glass" data-reveal data-tilt>
         <div class="project-card__media">
-          <img src="assets/img/projects/kairomod.webp" alt="Aperçu du site KaïroMod" width="1104" height="710" loading="lazy" decoding="async" />
+          <img src="assets/img/projects/kairomod.webp" alt="Aperçu du site KaïroMod" width="1400" height="900" loading="lazy" decoding="async" />
         </div>
         <div class="project-card__body">
           <span class="chip">E-commerce</span>
@@ -354,7 +359,7 @@
 
       <a href="https://charlesmds.fr" target="_blank" rel="noopener" class="project-card glass" data-reveal data-tilt>
         <div class="project-card__media">
-          <img src="assets/img/projects/charlesmds.webp" alt="Aperçu du site de Charles Machado, coach sportif" width="1104" height="710" loading="lazy" decoding="async" />
+          <img src="assets/img/projects/charlesmds.webp" alt="Aperçu du site de Charles Machado, coach sportif" width="1400" height="900" loading="lazy" decoding="async" />
         </div>
         <div class="project-card__body">
           <span class="chip">Web</span>
@@ -366,7 +371,7 @@
 
       <a href="https://gregjvdr.github.io/Harmonie-Remake/" target="_blank" rel="noopener" class="project-card glass project-card--wide" data-reveal data-tilt>
         <div class="project-card__media">
-          <img src="assets/img/projects/harmonie.webp" alt="Aperçu du site de l'Harmonie Fanfare Rudipontaine" width="1104" height="710" loading="lazy" decoding="async" />
+          <img src="assets/img/projects/harmonie.webp" alt="Aperçu du site de l'Harmonie Fanfare Rudipontaine" width="1400" height="900" loading="lazy" decoding="async" />
         </div>
         <div class="project-card__body">
           <span class="chip">Web</span>
@@ -422,7 +427,7 @@
 
   <!-- ============ PANEL 5 : Contact (ouverture en iris) ============ -->
   <div class="panel panel--last" data-panim="iris">
-  <section id="contact" class="contact section">
+  <section id="contact" class="contact section" data-anim-pause>
     <div class="contact__panel" data-reveal data-tilt>
       <!-- Vraie texture de verre (glasses.png), panoramique lent continu -->
       <div class="contact__bg" aria-hidden="true"></div>

@@ -179,6 +179,17 @@ body {
   .grain { animation: none; }
 }
 
+/* Pause des animations décoratives hors écran (classe posée par le JS).
+   `animation-play-state` fige l'animation là où elle en est : elle reprend
+   sans saut quand la section revient. Le sélecteur descendant couvre les
+   enfants animés (jauges, pseudo-éléments). */
+.anim-paused,
+.anim-paused *,
+.anim-paused::before,
+.anim-paused::after,
+.anim-paused *::before,
+.anim-paused *::after { animation-play-state: paused !important; }
+
 /* ---------- Glass core ---------- */
 .glass {
   position: relative;
@@ -378,6 +389,10 @@ body {
   .preloader__letter { animation: none; opacity: 1; filter: none; transform: none; }
 }
 .preloader.is-done { opacity: 0; visibility: hidden; pointer-events: none; }
+/* `visibility: hidden` ne suspend pas les animations : les cinq lettres
+   continuaient de respirer indéfiniment derrière la page une fois le
+   préchargeur parti. */
+.preloader.is-done .preloader__letter { animation: none; }
 body.is-loading { overflow: hidden; }
 
 /* ---------- Nav ---------- */
@@ -774,14 +789,18 @@ html.js .nav:not(.nav--in) {
   width: 4px; height: 14px;
   border-radius: 3px;
   background: var(--white);
+  /* animation en transform et non en `top` : `top` force un calcul de mise
+     en page à chaque frame, en continu et pour un simple point décoratif. */
+  top: 0;
   animation: scrollDot 2s var(--ease) infinite;
+  will-change: transform;
 }
 .scroll-cue--dark .scroll-cue__dot { background: var(--ink); }
 @keyframes scrollDot {
-  0% { top: -14px; opacity: 0; }
+  0% { transform: translateY(-14px); opacity: 0; }
   30% { opacity: 1; }
   80% { opacity: 1; }
-  100% { top: 46px; opacity: 0; }
+  100% { transform: translateY(46px); opacity: 0; }
 }
 
 /* ==========================================================================
@@ -845,6 +864,14 @@ html.js .nav:not(.nav--in) {
     white-space: nowrap;
   }
   .hero__meta--r { text-align: right; }
+  /* Plus de flottement sur mobile : ici ces deux mentions ne sont plus des
+     éléments décoratifs d'angle mais une ligne éditoriale alignée sous
+     l'entête — les voir dériver verticalement les rapprochait par moments de
+     la barre de navigation. Deux animations permanentes en moins. */
+  .hero__meta--l,
+  .hero__meta--r { animation: none; }
+  /* le reflet balayant du cadre bureau n'a plus de sens sur le cadre carré */
+  .hero__portrait::after { animation: none; display: none; }
   .hero__rule {
     display: block;
     height: 1px;
@@ -922,9 +949,19 @@ html.js .nav:not(.nav--in) {
     border: 1px solid rgba(11, 11, 10, .1);
     box-shadow: 0 10px 26px -16px rgba(11, 11, 10, .45);
   }
-  .hero__badge-ring {
+  /* L'animation est portée par l'enveloppe, pas par le <svg> : transformer
+     une racine SVG contenant un <textPath> oblige le moteur à recalculer la
+     mise en page du texte à chaque frame — mesuré, 240 layouts en 4s, soit
+     un par frame, pour un simple élément décoratif. Sur l'enveloppe, la
+     rotation reste une affaire de compositeur : zéro layout. */
+  .hero__badge-spin {
     position: absolute;
     inset: 0;
+    animation: heroBadgeSpin 18s linear infinite;
+    will-change: transform;
+  }
+  .hero__badge-ring {
+    display: block;
     width: 100%;
     height: 100%;
     fill: var(--ink-dim);
@@ -932,7 +969,6 @@ html.js .nav:not(.nav--in) {
     font-weight: 600;
     letter-spacing: .04em;
     text-transform: uppercase;
-    animation: heroBadgeSpin 18s linear infinite;
   }
   .hero__badge-arrow {
     font-size: clamp(1.1rem, 3.6vw, 1.4rem);
@@ -1118,7 +1154,7 @@ html.js .nav:not(.nav--in) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero__badge-ring { animation: none; }
+  .hero__badge-spin { animation: none; }
 }
 
 /* ---------- Panels (volets) ----------
@@ -1651,9 +1687,17 @@ html.js .panel--light [data-svc].is-in {
     0 30px 70px -25px rgba(0, 0, 0, .85);
 }
 
-/* réactivité du tilt/lift : transition courte le temps du survol,
-   la transition longue du reveal reprend la main à la sortie */
-[data-tilt]:hover { transition: transform .18s ease-out; }
+/* Suivi du pointeur : AUCUNE transition pendant le basculement. Une
+   transition, même courte, fait interpoler la carte vers la position visée au
+   lieu de s'y placer — d'où le retard ressenti derrière le curseur. Le JS pose
+   .is-tilting à l'entrée et la retire à la sortie, où une transition brève
+   assure le retour à plat avant que celle du reveal ne reprenne la main. */
+[data-tilt]:hover { transition: transform .32s var(--ease-glass); }
+[data-tilt].is-tilting {
+  transition: none;
+  /* couche promue le temps du survol : évite la saccade de la 1re frame */
+  will-change: transform;
+}
 
 .project-card--wide {
   grid-column: 1 / -1;
@@ -1788,12 +1832,28 @@ html.js .panel--light [data-svc].is-in {
   width: 7px; height: 7px;
   border-radius: 50%;
   background: #35c759;
-  animation: contactStatusPulse 2.2s ease-out infinite;
+  /* le halo est porté par ::after ci-dessous ; le point lui-même ne s'anime
+     pas, sinon les nouvelles keyframes le feraient grossir */
+}
+/* Halo porté par un pseudo-élément que l'on met à l'échelle, au lieu d'animer
+   box-shadow : une ombre animée est repeinte à chaque frame, alors qu'un
+   transform/opacity reste sur le compositeur. Rendu identique. */
+.contact__status-dot { position: relative; }
+.contact__status-dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(53, 199, 89, .55);
+  animation: contactStatusPulse 2.4s ease-out infinite;
+  will-change: transform, opacity;
+  pointer-events: none;
+  z-index: -1;
 }
 @keyframes contactStatusPulse {
-  0%   { box-shadow: 0 0 0 0 rgba(53, 199, 89, .55); }
-  70%  { box-shadow: 0 0 0 8px rgba(53, 199, 89, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(53, 199, 89, 0); }
+  0%   { transform: scale(1);   opacity: .55; }
+  70%  { transform: scale(3.6); opacity: 0; }
+  100% { transform: scale(3.6); opacity: 0; }
 }
 
 .contact__head { margin-bottom: 4px; }
