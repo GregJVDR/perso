@@ -1672,25 +1672,37 @@ html.js .panel--light [data-svc].is-in {
   overflow: hidden;
   background: linear-gradient(160deg, #1a1a1a, #050505);
 }
-.project-card__media img {
+/* Le zoom est porté par ce conteneur : une seule couche se transforme, les
+   deux images restent alignées. */
+.project-card__zoom {
+  position: absolute;
+  inset: 0;
+  transform: scale(1.02);
+  transition: transform .85s cubic-bezier(.33, .12, .2, 1);
+  will-change: transform;
+}
+.project-card:hover .project-card__zoom { transform: scale(1.08); }
+
+.project-card__img {
+  position: absolute;
+  inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
   object-position: top;
+  /* filtre STATIQUE : rastérisé une fois, jamais réévalué pendant le survol */
   filter: grayscale(1) contrast(1.05);
-  transform: scale(1.02);
-  /* courbe volontairement douce au démarrage : --ease-glass part à très
-     grande vitesse, ce qui rendait la mise en couleur brutale à l'instant
-     précis où le pointeur entrait sur la carte */
-  transition:
-    filter .85s cubic-bezier(.33, .12, .2, 1),
-    transform .85s cubic-bezier(.33, .12, .2, 1);
-  /* couche GPU pré-promue : évite la saccade du premier survol */
-  will-change: transform, filter;
 }
-.project-card:hover .project-card__media img {
-  filter: grayscale(0) contrast(1.02);
-  transform: scale(1.08);
+/* La mise en couleur est un fondu d'opacité — composé — au lieu d'une
+   animation de `filter`, qui obligeait à refiltrer l'image à chaque frame.
+   Courbe douce au départ : --ease-glass part à très grande vitesse, ce qui
+   rendait la transition brutale à l'instant où le pointeur entrait. */
+.project-card__img--couleur {
+  filter: contrast(1.02);
+  opacity: 0;
+  transition: opacity .8s cubic-bezier(.33, .12, .2, 1);
+  will-change: opacity;
 }
+.project-card:hover .project-card__img--couleur { opacity: 1; }
 .project-card__body { padding: 30px 30px 34px; }
 .project-card__body h3 { font-size: 1.3rem; margin: 14px 0 10px; letter-spacing: -0.01em; }
 .project-card__body p { color: var(--white-dim); line-height: 1.55; margin-bottom: 20px; }
