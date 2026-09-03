@@ -1489,7 +1489,9 @@ html.js .hslide-spacer { height: 100vh; }
 }
 .about__portrait {
   grid-area: portrait;
-  padding: 10px;
+  /* plus de padding : il laissait 11px de fond visible tout autour de la
+     photo, qui ne remplissait donc pas son cadre */
+  padding: 0;
   aspect-ratio: 4 / 5;
 }
 .about__portrait img {
@@ -1501,7 +1503,8 @@ html.js .hslide-spacer { height: 100vh; }
   object-fit: cover;
   object-position: 58% 35%;
   filter: grayscale(1) contrast(1.05);
-  border-radius: calc(var(--radius-lg) - 8px);
+  /* le cadre n'ayant plus de retrait, l'image en reprend l'arrondi exact */
+  border-radius: inherit;
 }
 .about__text {
   grid-area: text;
