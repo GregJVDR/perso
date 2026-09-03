@@ -340,11 +340,17 @@
 
   /* ---------------- Scroll progress bar ---------------- */
   const progressBar = document.getElementById("progressBar");
+  // scaleX et non width : `width` est une propriété de mise en page, elle
+  // relayoutait la page à chaque frame de défilement.
+  const railFill = document.getElementById("railFill");
+  const railNum = document.getElementById("railNum");
+  const rail = document.querySelector(".rail");
   const updateProgress = () => {
     const scrollTop = window.scrollY;
     const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-    const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-    progressBar.style.width = pct + "%";
+    const ratio = docHeight > 0 ? scrollTop / docHeight : 0;
+    progressBar.style.transform = `scaleX(${ratio.toFixed(4)})`;
+    if (railFill) railFill.style.transform = `scaleY(${ratio.toFixed(4)})`;
   };
 
   /* ---------------- Nav: hide on scroll down, scrollspy, sliding pill ---------------- */
@@ -397,6 +403,10 @@
     if (current.id !== spyId) {
       spyId = current.id;
       setActiveLink(spyId);
+      if (railNum) {
+        const n = spySections.indexOf(current) + 1;
+        railNum.textContent = String(n).padStart(2, "0");
+      }
     }
   };
 
@@ -417,6 +427,10 @@
       onLight = r.top < navBottom && r.bottom > 0 && r.left < window.innerWidth * 0.4;
     }
     nav.classList.toggle("nav--on-light", onLight);
+    if (rail) {
+      rail.classList.toggle("is-on", window.scrollY > window.innerHeight * 0.6);
+      rail.classList.toggle("rail--on-light", onLight);
+    }
   };
 
   const onScroll = () => {
@@ -721,6 +735,79 @@
   } else {
     const cursorEl = document.querySelector(".cursor");
     if (cursorEl) cursorEl.style.display = "none";
+  }
+
+  /* ---------------- Parallaxe douce ----------------
+     Les décalages sont calculés à partir de positions MESURÉES UNE FOIS (et
+     re-mesurées au redimensionnement) : lire getBoundingClientRect à chaque
+     frame forcerait un calcul de mise en page par élément et par frame. */
+  const parallaxEls = [...document.querySelectorAll("[data-parallax]")];
+  if (parallaxEls.length && !reduceMotion) {
+    let mesures = [];
+    const mesurer = () => {
+      mesures = parallaxEls.map((el) => {
+        const prev = el.style.transform;
+        el.style.transform = "none";
+        const r = el.getBoundingClientRect();
+        el.style.transform = prev;
+        return {
+          el,
+          centre: r.top + window.scrollY + r.height / 2,
+          amp: parseFloat(el.dataset.parallax) || 14,
+        };
+      });
+    };
+    const appliquer = () => {
+      const vh = window.innerHeight;
+      const y = window.scrollY + vh / 2;
+      for (let i = 0; i < mesures.length; i++) {
+        const m = mesures[i];
+        const p = Math.max(-1, Math.min(1, (m.centre - y) / vh));
+        m.el.style.transform = `translate3d(0, ${(p * m.amp).toFixed(1)}px, 0)`;
+      }
+    };
+    mesurer();
+    appliquer();
+    onScrollFrame(appliquer);
+    window.addEventListener("resize", () => {
+      mesurer();
+      appliquer();
+    });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(mesurer);
+  }
+
+  /* ---------------- Boutons magnétiques ----------------
+     Le bouton s'incline vers le pointeur puis revient. Même discipline que le
+     basculement des cartes : rectangle mis en cache à l'entrée, transform
+     seul, et transition rétablie pour le retour. */
+  if (isFinePointer && !reduceMotion) {
+    document.querySelectorAll("[data-magnet]").forEach((el) => {
+      let r = null;
+      let frame = null;
+      let mx = 0;
+      let my = 0;
+      const poser = () => {
+        frame = null;
+        el.style.transform = `translate3d(${mx.toFixed(1)}px, ${my.toFixed(1)}px, 0)`;
+      };
+      el.addEventListener("mouseenter", () => {
+        r = el.getBoundingClientRect();
+        el.style.transition = "none";
+      });
+      el.addEventListener("mousemove", (e) => {
+        if (!r) r = el.getBoundingClientRect();
+        mx = (e.clientX - (r.left + r.width / 2)) * 0.22;
+        my = (e.clientY - (r.top + r.height / 2)) * 0.28;
+        if (frame === null) frame = requestAnimationFrame(poser);
+      });
+      el.addEventListener("mouseleave", () => {
+        if (frame !== null) cancelAnimationFrame(frame);
+        frame = null;
+        r = null;
+        el.style.transition = "";
+        el.style.transform = "";
+      });
+    });
   }
 
   /* ---------------- Glass card tilt ---------------- */

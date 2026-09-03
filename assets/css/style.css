@@ -156,6 +156,96 @@ body {
   [data-title-drop] .tl-mask__inner { transform: none; opacity: 1; filter: none; transition: none; }
 }
 
+
+/* ==========================================================================
+   Dévoilements éditoriaux — tout en transform/opacity, jamais en propriétés
+   de mise en page, pour ne rien coûter en layout pendant le scroll.
+   ========================================================================== */
+
+/* Rideau : un volet opaque couvre l'image et se retire vers le haut quand le
+   bloc entre à l'écran. Pas de balisage ajouté, un pseudo-élément suffit. */
+.about__portrait::after,
+.project-card__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background: var(--black);
+  transform: translateY(0);
+  transition: transform 1.15s var(--ease-glass);
+  pointer-events: none;
+}
+.about__portrait.in-view::after,
+[data-reveal].in-view .project-card__media::after { transform: translateY(-101%); }
+/* la carte large part avec un souffle de retard, comme les cascades existantes */
+.projects__grid [data-reveal]:nth-child(2) .project-card__media::after { transition-delay: .1s; }
+.projects__grid [data-reveal]:nth-child(3) .project-card__media::after { transition-delay: .2s; }
+
+/* Cascades supplémentaires, dans la continuité de celles déjà en place */
+.services__grid [data-svc]:nth-child(2) { transition-delay: .08s; }
+.services__grid [data-svc]:nth-child(3) { transition-delay: .16s; }
+.services__grid [data-svc]:nth-child(4) { transition-delay: .24s; }
+.footer__grid [data-reveal]:nth-child(2) { transition-delay: .1s; }
+.footer__grid [data-reveal]:nth-child(3) { transition-delay: .2s; }
+.footer__grid [data-reveal]:nth-child(4) { transition-delay: .3s; }
+
+/* ---------- Rail latéral (numéro de section + jauge) ---------- */
+.rail {
+  position: fixed;
+  left: clamp(16px, 2.4vw, 34px);
+  top: 50%;
+  z-index: 880;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--white-faint);
+  font-size: .62rem;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity .6s var(--ease), color .4s ease;
+}
+/* n'apparaît qu'une fois le hero dépassé : sur le hero clair il ferait tache
+   et le repère "Scroll" du hero joue déjà ce rôle */
+.rail.is-on { opacity: 1; }
+.rail--on-light { color: var(--ink-faint); }
+.rail__num {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: currentColor;
+}
+.rail__track {
+  position: relative;
+  width: 1px;
+  height: clamp(90px, 14vh, 150px);
+  background: currentColor;
+  opacity: .35;
+  overflow: hidden;
+}
+.rail__fill {
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  transform: scaleY(0);
+  transform-origin: top;
+  /* scaleY plutôt qu'une hauteur : reste sur le compositeur */
+  will-change: transform;
+}
+.rail__label { writing-mode: vertical-rl; }
+
+@media (max-width: 1100px) {
+  /* trop étroit pour un rail sans empiéter sur le contenu ; le hero mobile a
+     déjà son propre indicateur de défilement */
+  .rail { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .about__portrait::after,
+  .project-card__media::after { display: none; }
+}
+
 /* ---------- Grain overlay ---------- */
 .grain {
   position: fixed;
@@ -346,7 +436,12 @@ body {
 .progress span {
   display: block;
   height: 100%;
-  width: 0%;
+  /* pleine largeur, réduite par scaleX depuis la gauche : `width` aurait
+     relayouté la page à chaque frame de défilement */
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left;
+  will-change: transform;
   background: linear-gradient(90deg, rgba(255,255,255,.5), var(--white));
   box-shadow: 0 0 12px rgba(255,255,255,.6);
 }
@@ -1398,7 +1493,11 @@ html.js .hslide-spacer { height: 100vh; }
   aspect-ratio: 4 / 5;
 }
 .about__portrait img {
-  width: 100%; height: 100%;
+  width: 100%;
+  /* rab vertical : la parallaxe décale l'image de +/-16px, sans ce
+     débordement elle découvrirait le fond du cadre en haut ou en bas */
+  height: calc(100% + 48px);
+  margin-top: -24px;
   object-fit: cover;
   object-position: 58% 35%;
   filter: grayscale(1) contrast(1.05);

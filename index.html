@@ -26,6 +26,13 @@
 <!-- Scroll progress -->
 <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
 
+<!-- Rail latéral : numéro de la section courante + jauge de progression -->
+<div class="rail" aria-hidden="true">
+  <span class="rail__num" id="railNum">01</span>
+  <span class="rail__track"><span class="rail__fill" id="railFill"></span></span>
+  <span class="rail__label">Scroll</span>
+</div>
+
 <!-- Preloader -->
 <div class="preloader" id="preloader" aria-hidden="true">
   <div class="preloader__mark">
@@ -47,7 +54,7 @@
       <a href="#process" class="nav__link" data-nav>Process</a>
       <a href="#contact" class="nav__link" data-nav>Contact</a>
     </nav>
-    <a href="#contact" class="nav__cta btn btn--glass btn--sm">Discutons</a>
+    <a href="#contact" class="nav__cta btn btn--glass btn--sm" data-magnet>Discutons</a>
     <button class="nav__burger" id="navBurger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobileMenu">
       <span></span><span></span><span></span>
     </button>
@@ -135,8 +142,8 @@
 
       <div class="hero__foot">
         <div class="hero__cta">
-          <a href="#services" class="btn btn--glass-dark">Voir mes compétences<span class="btn__arrow" aria-hidden="true"><svg class="icon-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.4 11.6 11.6 4.4M6.2 4.4h5.4v5.4"/></svg></span></a>
-          <a href="#contact" class="btn btn--ghost-dark">Me contacter<span class="btn__arrow" aria-hidden="true"><svg class="icon-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 8h10M9.2 4.2 13 8l-3.8 3.8"/></svg></span></a>
+          <a href="#services" class="btn btn--glass-dark" data-magnet>Voir mes compétences<span class="btn__arrow" aria-hidden="true"><svg class="icon-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.4 11.6 11.6 4.4M6.2 4.4h5.4v5.4"/></svg></span></a>
+          <a href="#contact" class="btn btn--ghost-dark" data-magnet>Me contacter<span class="btn__arrow" aria-hidden="true"><svg class="icon-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 8h10M9.2 4.2 13 8l-3.8 3.8"/></svg></span></a>
         </div>
       </div>
 
@@ -180,7 +187,7 @@
 
     <div class="about__grid">
       <div class="about__portrait glass" data-reveal data-tilt>
-        <img src="assets/img/ecole.webp" alt="" aria-hidden="true" width="1307" height="981" loading="lazy" decoding="async" />
+        <img data-parallax="14" src="assets/img/ecole.webp" alt="" aria-hidden="true" width="1307" height="981" loading="lazy" decoding="async" />
       </div>
 
       <div class="about__text" data-reveal-text>
@@ -339,9 +346,14 @@
   <!-- ============ PANEL 3 : Projets (zoom montant) ============ -->
   <div class="panel" data-panim="zoom">
   <section id="projects" class="projects section">
-    <div class="section__head">
-      <p class="eyebrow" data-reveal>03 — Projets</p>
-      <h2 class="title-lg" data-reveal>Une sélection<br />de réalisations.</h2>
+    <div class="section__head" data-title-drop>
+      <p class="eyebrow">
+        <span class="tl-mask"><span class="tl-mask__inner">03 — Projets</span></span>
+      </p>
+      <h2 class="title-lg">
+        <span class="tl-mask"><span class="tl-mask__inner">Une sélection</span></span>
+        <span class="tl-mask"><span class="tl-mask__inner">de réalisations.</span></span>
+      </h2>
     </div>
 
     <div class="projects__grid">
@@ -411,9 +423,14 @@
   <!-- ============ PANEL 4 : Process (balayage depuis la droite) ============ -->
   <div class="panel" data-panim="wipe-right">
   <section id="process" class="process section">
-    <div class="section__head">
-      <p class="eyebrow" data-reveal>04 — Process</p>
-      <h2 class="title-lg" data-reveal>Une méthode claire,<br />du brief à la livraison.</h2>
+    <div class="section__head" data-title-drop>
+      <p class="eyebrow">
+        <span class="tl-mask"><span class="tl-mask__inner">04 — Process</span></span>
+      </p>
+      <h2 class="title-lg">
+        <span class="tl-mask"><span class="tl-mask__inner">Une méthode claire,</span></span>
+        <span class="tl-mask"><span class="tl-mask__inner">du brief à la livraison.</span></span>
+      </h2>
     </div>
 
     <ol class="timeline">
