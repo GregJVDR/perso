@@ -48,13 +48,6 @@ svg { display: block; }
   --ease-glass: cubic-bezier(.22, 1, .36, 1);
   --dur: .8s;
 
-  /* Police d'affichage : un serif éditorial à fort contraste pour tout ce qui
-     est grand. Le corps de texte reste sur la pile système, plus lisible en
-     petit et sans coût de chargement. Instrument Serif n'existe qu'en 400 :
-     les titres passent donc de 650/700 à 400, compensé par des tailles plus
-     généreuses et un interlettrage resserré. */
-  --font-display: "Instrument Serif", "Iowan Old Style", Georgia, "Times New Roman", serif;
-
   --container: 1240px;
   --gutter: clamp(20px, 5vw, 64px);
 
@@ -252,7 +245,6 @@ body {
   .about__portrait::after,
   .project-card__media::after { display: none; }
 }
-
 
 /* ---------- Grain overlay ---------- */
 .grain {
@@ -2219,47 +2211,4 @@ html.js .panel--light [data-svc].is-in {
   [data-reveal] { opacity: 1; transform: none; filter: none; transition: none; }
   .xline__inner { transform: none !important; transition: none !important; }
   html { scroll-behavior: auto; }
-}
-
-/* ==========================================================================
-   Direction artistique — hiérarchie typographique
-   Le display passe au serif, le corps reste en sans système. Le contraste
-   entre les deux est ce qui sort la page du registre "template".
-   ========================================================================== */
-.hero__name,
-.title-lg,
-.domains__item,
-.footer__watermark,
-.stats__num,
-.project-card__body h3,
-.timeline__num {
-  font-family: var(--font-display);
-  font-weight: 400;
-}
-/* Le serif porte moins loin que le gras d'origine à taille égale : on
-   compense par l'échelle et par un interlettrage plus serré. */
-.hero__name .line { font-size: clamp(3.2rem, 13vw, 12rem); letter-spacing: -0.02em; }
-.title-lg { font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -0.015em; line-height: 1.02; }
-.domains__item { font-size: clamp(1.6rem, 4vw, 2.9rem); letter-spacing: -0.01em; }
-.domains__item.is-active { font-size: clamp(2.1rem, 5.2vw, 3.9rem); }
-.stats__num { font-size: clamp(2.4rem, 4.6vw, 3.6rem); letter-spacing: -0.01em; }
-.project-card__body h3 { font-size: clamp(1.45rem, 2vw, 1.75rem); letter-spacing: -0.01em; }
-.footer__watermark { letter-spacing: -0.01em; }
-
-/* Les libellés vont dans l'autre sens : plus petits, plus espacés. C'est
-   l'écart entre les deux extrêmes qui fait la tenue éditoriale. */
-.eyebrow,
-.rail,
-.hero__baseline,
-.footer__col h3 { letter-spacing: .26em; }
-
-@media (max-width: 768px) {
-  /* Le serif est plus étroit que l'ancien sans gras : à vw égal le nom ne
-     remplissait plus que 57% de la largeur. Recalé pour revenir au plein
-     format sur téléphone. */
-  .hero__name .line--top { font-size: clamp(3.6rem, 23vw, 7rem); }
-  .hero__name .line--bottom { font-size: clamp(2.8rem, 17.5vw, 5.4rem); }
-  .title-lg { font-size: clamp(1.9rem, 8.4vw, 2.6rem); }
-  .domains__item { font-size: clamp(1.15rem, 4.8vw, 1.7rem); }
-  .domains__item.is-active { font-size: clamp(1.35rem, 6vw, 2.1rem); }
 }
