@@ -3,11 +3,77 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Grégoire Jury--Vermot des Roches — Développeur SaaS &amp; Créateur Digital</title>
-<meta name="description" content="Portfolio de Grégoire Jury--Vermot des Roches : développement SaaS, sites web sur-mesure, design UI/UX et montage / dépannage informatique." />
-<meta name="color-scheme" content="dark" />
-<meta name="theme-color" content="#030303" />
+<title>Grégoire Jury--Vermot des Roches — Création de sites web &amp; applications sur mesure</title>
+<meta name="description" content="Développeur web freelance en France : sites vitrines, e-commerce et applications SaaS sur mesure, rapides et soignés. Découvrez mes réalisations et parlons de votre projet." />
+<meta name="author" content="Grégoire Jury--Vermot des Roches" />
+<meta name="robots" content="index, follow, max-image-preview:large" />
+<!-- URL publique actuelle (GitHub Pages). À mettre à jour partout dans ce
+     bloc, ainsi que dans sitemap.xml, si le site passe sur un nom de domaine. -->
+<link rel="canonical" href="https://gregjvdr.github.io/perso/" />
+<meta name="color-scheme" content="light dark" />
+<!-- Le haut de page est le hero crème : la barre du navigateur mobile s'y
+     fond au lieu de trancher en noir au-dessus. -->
+<meta name="theme-color" content="#ece3d1" />
+
+<!-- Partage (LinkedIn, Facebook, messageries) -->
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="fr_FR" />
+<meta property="og:site_name" content="Grégoire Jury--Vermot des Roches" />
+<meta property="og:url" content="https://gregjvdr.github.io/perso/" />
+<meta property="og:title" content="Grégoire Jury--Vermot des Roches — Sites web &amp; applications sur mesure" />
+<meta property="og:description" content="Sites vitrines, e-commerce et applications SaaS sur mesure : rapides, soignés et pensés pour convertir." />
+<meta property="og:image" content="https://gregjvdr.github.io/perso/assets/img/og-image.jpg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Grégoire Jury--Vermot des Roches, développeur web — portrait et nom sur fond crème" />
+<meta name="twitter:card" content="summary_large_image" />
+
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23050505'/%3E%3Ctext x='50' y='68' font-size='58' font-family='-apple-system,Helvetica,Arial,sans-serif' font-weight='600' fill='%23f5f5f7' text-anchor='middle'%3EG%3C/text%3E%3C/svg%3E" />
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" />
+
+<!-- Image du hero demandée dès l'analyse du <head>, avant la feuille de
+     style : c'est le plus gros élément du premier écran (LCP). -->
+<link rel="preload" as="image" href="greg.webp" fetchpriority="high" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": "https://gregjvdr.github.io/perso/#gregoire",
+      "name": "Grégoire Jury--Vermot des Roches",
+      "jobTitle": "Développeur web freelance",
+      "description": "Conception et développement de sites vitrines, e-commerce et applications SaaS sur mesure.",
+      "url": "https://gregjvdr.github.io/perso/",
+      "image": "https://gregjvdr.github.io/perso/greg.webp",
+      "email": "mailto:gregjvdr@gmail.com",
+      "address": { "@type": "PostalAddress", "addressCountry": "FR" },
+      "knowsAbout": ["Création de sites web", "E-commerce", "Applications SaaS", "Design UI/UX", "Référencement naturel", "Montage et dépannage PC"],
+      "sameAs": [
+        "https://www.linkedin.com/in/gregjvdr/",
+        "https://github.com/GregJVDR",
+        "https://www.instagram.com/greg.jvdr/"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://gregjvdr.github.io/perso/#site",
+      "url": "https://gregjvdr.github.io/perso/",
+      "name": "Grégoire Jury--Vermot des Roches",
+      "inLanguage": "fr-FR",
+      "publisher": { "@id": "https://gregjvdr.github.io/perso/#gregoire" }
+    }
+  ]
+}
+</script>
+<!-- Avant le premier rendu : active les états gérés en JS (main.js est
+     différé) et saute l'écran de chargement s'il a déjà été vu dans la
+     session. Deux lignes, aucun blocage. -->
+<script>
+  document.documentElement.classList.add("js");
+  try { if (sessionStorage.getItem("gj-vu")) document.documentElement.classList.add("deja-vu"); } catch (e) {}
+</script>
 <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body>
@@ -44,17 +110,17 @@
 <!-- Floating glass nav -->
 <header class="nav nav--on-light" id="siteNav">
   <div class="nav__inner glass">
-    <a href="#hero" class="nav__logo">GJ<span class="dot">.</span></a>
+    <a href="#hero" class="nav__logo" aria-label="Grégoire Jury--Vermot des Roches, retour en haut de page">GJ<span class="dot" aria-hidden="true">.</span></a>
     <nav class="nav__links" id="navLinks" aria-label="Navigation principale">
       <span class="nav__indicator" id="navIndicator" aria-hidden="true"></span>
       <a href="#hero" class="nav__link is-active" data-nav>Accueil</a>
       <a href="#about" class="nav__link" data-nav>À propos</a>
-      <a href="#services" class="nav__link" data-nav>Compétences</a>
-      <a href="#projects" class="nav__link" data-nav>Projets</a>
-      <a href="#process" class="nav__link" data-nav>Process</a>
+      <a href="#services" class="nav__link" data-nav>Services</a>
+      <a href="#projects" class="nav__link" data-nav>Réalisations</a>
+      <a href="#process" class="nav__link" data-nav>Méthode</a>
       <a href="#contact" class="nav__link" data-nav>Contact</a>
     </nav>
-    <a href="#contact" class="nav__cta btn btn--glass btn--sm" data-magnet>Discutons</a>
+    <a href="#contact" class="nav__cta btn btn--glass btn--sm" data-magnet>Démarrer un projet</a>
     <button class="nav__burger" id="navBurger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobileMenu">
       <span></span><span></span><span></span>
     </button>
@@ -62,14 +128,17 @@
 </header>
 
 <!-- Mobile menu -->
-<div class="mobile-menu glass" id="mobileMenu">
+<!-- `inert` tant qu'il est fermé : invisible, il restait pourtant atteignable
+     à la tabulation — six arrêts clavier sur des liens que personne ne voit. -->
+<nav class="mobile-menu glass" id="mobileMenu" aria-label="Menu" inert>
   <a href="#hero" data-nav>Accueil</a>
   <a href="#about" data-nav>À propos</a>
-  <a href="#services" data-nav>Compétences</a>
-  <a href="#projects" data-nav>Projets</a>
-  <a href="#process" data-nav>Process</a>
+  <a href="#services" data-nav>Services</a>
+  <a href="#projects" data-nav>Réalisations</a>
+  <a href="#process" data-nav>Méthode</a>
   <a href="#contact" data-nav>Contact</a>
-</div>
+  <a href="#contact" class="mobile-menu__cta btn">Démarrer un projet</a>
+</nav>
 
 <main id="main">
 
@@ -84,7 +153,7 @@
            768px : il ne produit alors aucune boîte et les deux mentions
            restent positionnées dans les angles comme sur la version bureau. -->
       <div class="hero__editorial">
-        <span class="hero__meta hero__meta--l" aria-hidden="true">Développeur&nbsp;SaaS<br />&amp; Créateur digital</span>
+        <span class="hero__meta hero__meta--l" aria-hidden="true">Développeur web<br />freelance</span>
         <span class="hero__rule" aria-hidden="true"></span>
         <span class="hero__meta hero__meta--r" aria-hidden="true">Basé en France<br />Disponible</span>
       </div>
@@ -110,6 +179,7 @@
             fetchpriority="high"
             decoding="async"
           />
+          <span class="hero__glint" aria-hidden="true"></span>
         </div>
 
         <span class="hero__badge" aria-hidden="true">
@@ -138,12 +208,16 @@
         </span>
       </div>
 
-      <p class="hero__baseline">Des idées en solutions digitales</p>
-
       <div class="hero__foot">
+        <!-- Accroche : ce que je fais, pour qui, et la promesse. Placée dans le
+             bloc du bas pour servir toutes les largeurs : barre accroche /
+             boutons sous le nom sur grand écran, entre le nom et les boutons
+             dans la colonne mobile. Lue juste après le <h1>, contrairement aux
+             mentions d'angle, décoratives. -->
+        <p class="hero__pitch">Sites vitrines, e-commerce et applications <strong>sur&nbsp;mesure</strong>&nbsp;— rapides, soignés et pensés pour convertir.</p>
         <div class="hero__cta">
-          <a href="#services" class="btn btn--glass-dark" data-magnet>Voir mes compétences<span class="btn__arrow" aria-hidden="true"><svg class="icon-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.4 11.6 11.6 4.4M6.2 4.4h5.4v5.4"/></svg></span></a>
-          <a href="#contact" class="btn btn--ghost-dark" data-magnet>Me contacter<span class="btn__arrow" aria-hidden="true"><svg class="icon-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 8h10M9.2 4.2 13 8l-3.8 3.8"/></svg></span></a>
+          <a href="#contact" class="btn btn--glass-dark" data-magnet>Démarrer un projet<span class="btn__arrow" aria-hidden="true"><svg class="icon-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.4 11.6 11.6 4.4M6.2 4.4h5.4v5.4"/></svg></span></a>
+          <a href="#projects" class="btn btn--ghost-dark" data-magnet>Voir les réalisations<span class="btn__arrow" aria-hidden="true"><svg class="icon-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 3v10M4.2 9.2 8 13l3.8-3.8"/></svg></span></a>
         </div>
       </div>
 
@@ -166,9 +240,9 @@
   <!-- ============ MARQUEE ============ -->
   <div class="marquee" aria-hidden="true" data-anim-pause>
     <div class="marquee__track">
-      <span>SAAS</span><span>·</span><span>WEB CUSTOM</span><span>·</span><span>DESIGN</span><span>·</span><span>HARDWARE</span><span>·</span>
-      <span>SAAS</span><span>·</span><span>WEB CUSTOM</span><span>·</span><span>DESIGN</span><span>·</span><span>HARDWARE</span><span>·</span>
-      <span>SAAS</span><span>·</span><span>WEB CUSTOM</span><span>·</span><span>DESIGN</span><span>·</span><span>HARDWARE</span><span>·</span>
+      <span>SITES WEB</span><span>·</span><span>E-COMMERCE</span><span>·</span><span>SAAS</span><span>·</span><span>DESIGN UI</span><span>·</span>
+      <span>SITES WEB</span><span>·</span><span>E-COMMERCE</span><span>·</span><span>SAAS</span><span>·</span><span>DESIGN UI</span><span>·</span>
+      <span>SITES WEB</span><span>·</span><span>E-COMMERCE</span><span>·</span><span>SAAS</span><span>·</span><span>DESIGN UI</span><span>·</span>
     </div>
   </div>
 
@@ -186,7 +260,7 @@
     </div>
 
     <div class="about__grid">
-      <div class="about__portrait glass" data-reveal data-tilt>
+      <div class="about__portrait" data-reveal data-tilt>
         <img data-parallax="14" src="assets/img/ecole.webp" alt="" aria-hidden="true" width="1307" height="981" loading="lazy" decoding="async" />
       </div>
 
@@ -269,11 +343,22 @@
   <section id="services" class="services section">
     <span class="services__ghost" aria-hidden="true" id="servicesGhost">Expertises</span>
     <div class="section__head">
-      <p class="eyebrow" data-reveal>02 — Compétences</p>
+      <p class="eyebrow" data-reveal>02 — Services</p>
       <h2 class="title-lg" data-split-right>Quatre expertises,<br />un seul interlocuteur.</h2>
     </div>
 
     <div class="services__grid">
+      <article class="service-card" data-svc data-tilt>
+        <div class="service-card__icon">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 14 4 24l12 10" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 14l12 10-12 10" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 8 20 40" stroke-linecap="round"/></svg>
+        </div>
+        <h3>Sites web sur mesure</h3>
+        <p>Sites vitrines &amp; e-commerce conçus pour votre activité, sans template générique. Rapides, lisibles sur mobile, optimisés pour le référencement.</p>
+        <ul class="service-card__tags">
+          <li>Design responsive</li><li>Performance</li><li>SEO</li><li>Animations</li>
+        </ul>
+      </article>
+
       <article class="service-card" data-svc data-tilt>
         <div class="service-card__icon">
           <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M24 6 4 16l20 10 20-10-20-10Z" stroke-linejoin="round"/><path d="M4 24l20 10 20-10" stroke-linejoin="round"/><path d="M4 32l20 10 20-10" stroke-linejoin="round"/></svg>
@@ -282,17 +367,6 @@
         <p>Applications web sur-mesure : authentification, bases de données, paiements, tableaux de bord — de l'idée au déploiement cloud scalable.</p>
         <ul class="service-card__tags">
           <li>React / Next.js</li><li>Node.js</li><li>API &amp; Bases de données</li><li>Cloud &amp; déploiement</li>
-        </ul>
-      </article>
-
-      <article class="service-card" data-svc data-tilt>
-        <div class="service-card__icon">
-          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 14 4 24l12 10" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 14l12 10-12 10" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 8 20 40" stroke-linecap="round"/></svg>
-        </div>
-        <h3>Sites Web Custom</h3>
-        <p>Sites vitrines &amp; e-commerce pensés sur-mesure, sans templates génériques. Rapides, responsives, optimisés SEO.</p>
-        <ul class="service-card__tags">
-          <li>Design responsive</li><li>Performance</li><li>SEO</li><li>Animations</li>
         </ul>
       </article>
 
@@ -319,113 +393,145 @@
       </article>
     </div>
 
-    <!-- Barres de compétences "liquides" -->
-    <div class="skillbars" data-reveal data-anim-pause>
-      <h3 class="skillbars__title">Stack &amp; outils</h3>
-      <div class="skillbar">
-        <div class="skillbar__label"><span>Développement Web</span><span class="skillbar__pct">90%</span></div>
-        <div class="skillbar__track"><div class="skillbar__fill" data-fill="90"></div></div>
-      </div>
-      <div class="skillbar">
-        <div class="skillbar__label"><span>SaaS &amp; Cloud</span><span class="skillbar__pct">85%</span></div>
-        <div class="skillbar__track"><div class="skillbar__fill" data-fill="85"></div></div>
-      </div>
-      <div class="skillbar">
-        <div class="skillbar__label"><span>Design UI/UX</span><span class="skillbar__pct">80%</span></div>
-        <div class="skillbar__track"><div class="skillbar__fill" data-fill="80"></div></div>
-      </div>
-      <div class="skillbar">
-        <div class="skillbar__label"><span>Hardware &amp; Dépannage</span><span class="skillbar__pct">95%</span></div>
-        <div class="skillbar__track"><div class="skillbar__fill" data-fill="95"></div></div>
-      </div>
-    </div>
+    <p class="services__next" data-reveal>
+      Un besoin qui ne rentre dans aucune case&nbsp;?
+      <a href="#contact" class="link-arrow">Parlons-en<span aria-hidden="true"><svg class="icon-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M3 8h10M9.2 4.2 13 8l-3.8 3.8"/></svg></span></a>
+    </p>
   </section>
   </div>
   </div><!-- /hslide -->
 
-  <!-- ============ PANEL 3 : Projets (zoom montant) ============ -->
+  <!-- ============ PANEL 3 : Réalisations — études de cas (zoom montant) ============ -->
   <div class="panel" data-panim="zoom">
   <section id="projects" class="projects section">
     <div class="section__head" data-title-drop>
       <p class="eyebrow">
-        <span class="tl-mask"><span class="tl-mask__inner">03 — Projets</span></span>
+        <span class="tl-mask"><span class="tl-mask__inner">03 — Réalisations</span></span>
       </p>
       <h2 class="title-lg">
-        <span class="tl-mask"><span class="tl-mask__inner">Une sélection</span></span>
-        <span class="tl-mask"><span class="tl-mask__inner">de réalisations.</span></span>
+        <span class="tl-mask"><span class="tl-mask__inner">Trois projets,</span></span>
+        <span class="tl-mask"><span class="tl-mask__inner">de l'idée au lancement.</span></span>
       </h2>
     </div>
 
-    <div class="projects__grid">
-      <a href="https://kairomod.fr" target="_blank" rel="noopener" class="project-card glass" data-reveal data-tilt>
-        <div class="project-card__media">
-          <!-- Deux copies de la même image (une seule requête réseau) : la
-               version grise porte un filtre STATIQUE, la version couleur est
-               révélée par un fondu d'opacité. Animer `filter` refiltrait
-               l'image à chaque frame du survol ; l'opacité, elle, reste sur
-               le compositeur. -->
-          <div class="project-card__zoom">
-            <img class="project-card__img" src="assets/img/projects/kairomod.webp" alt="Aperçu du site KaïroMod" width="1400" height="900" loading="lazy" decoding="async" />
-            <img class="project-card__img project-card__img--couleur" src="assets/img/projects/kairomod.webp" alt="" aria-hidden="true" width="1400" height="900" loading="lazy" decoding="async" />
-          </div>
+    <div class="cases">
+      <article class="case" data-reveal aria-labelledby="case-kairomod">
+        <!-- Doublon souris du lien principal : hors tabulation et masqué aux
+             lecteurs d'écran, qui passent par le lien texte plus bas. -->
+        <a class="case__media project-card__media" href="https://kairomod.fr" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+          <!-- Deux copies de la même image (une seule requête : même srcset) :
+               la grise porte un filtre statique, la couleur arrive en fondu
+               d'opacité — composé, jamais refiltré pendant le survol. -->
+          <span class="project-card__zoom">
+            <img class="project-card__img" src="assets/img/projects/kairomod.webp" srcset="assets/img/projects/kairomod-800.webp 800w, assets/img/projects/kairomod.webp 1400w" sizes="(max-width: 900px) 92vw, 720px" alt="" width="1400" height="900" loading="lazy" decoding="async" />
+            <img class="project-card__img project-card__img--couleur" src="assets/img/projects/kairomod.webp" srcset="assets/img/projects/kairomod-800.webp 800w, assets/img/projects/kairomod.webp 1400w" sizes="(max-width: 900px) 92vw, 720px" alt="" width="1400" height="900" loading="lazy" decoding="async" />
+          </span>
+          <span class="case__url glass">kairomod.fr<span class="case__url-arrow"><svg class="icon-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.4 11.6 11.6 4.4M6.2 4.4h5.4v5.4"/></svg></span></span>
+        </a>
+        <div class="case__body">
+          <p class="case__kicker"><span class="case__num">01</span><span class="chip">E-commerce</span></p>
+          <h3 class="case__title" id="case-kairomod">KaïroMod</h3>
+          <p class="case__lead">Des montres Seiko Mod assemblées à la main, à composer pièce par pièce en&nbsp;ligne.</p>
+          <dl class="case__facts">
+            <div class="case__fact">
+              <dt>Contexte</dt>
+              <dd>Un atelier qui conçoit et assemble à la main des montres Seiko Mod, chaque pièce étant composée à partir de composants sélectionnés.</dd>
+            </div>
+            <div class="case__fact">
+              <dt>Ce que j'ai réalisé</dt>
+              <dd>Le site e-commerce et son configurateur interactif — boîtier, cadran, bracelet, verre saphir —, avec suivi de commande et espace client.</dd>
+            </div>
+            <div class="case__fact">
+              <dt>Résultat</dt>
+              <dd>Site en ligne sur kairomod.fr.</dd>
+            </div>
+          </dl>
+          <a class="case__link link-arrow" href="https://kairomod.fr" target="_blank" rel="noopener">Voir le site en ligne<span class="sr-only"> : KaïroMod (nouvel onglet)</span><span aria-hidden="true"><svg class="icon-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.4 11.6 11.6 4.4M6.2 4.4h5.4v5.4"/></svg></span></a>
+          <p class="sr-only">Capture : page d'accueil de KaïroMod, une montre à bracelet jubilé et la liste des modèles à configurer.</p>
         </div>
-        <div class="project-card__body">
-          <span class="chip">E-commerce</span>
-          <h3>KaïroMod — Montres sur-mesure</h3>
-          <p>Configurateur interactif pour personnaliser des montres Seiko Mod assemblées à la main : boîtier, cadran, bracelet, verre saphir, suivi de commande et espace client.</p>
-          <span class="project-card__link">Voir le site <i class="project-card__arrow"><svg class="icon-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 8h10M9.2 4.2 13 8l-3.8 3.8"/></svg></i></span>
-        </div>
-      </a>
+      </article>
 
-      <a href="https://charlesmds.fr" target="_blank" rel="noopener" class="project-card glass" data-reveal data-tilt>
-        <div class="project-card__media">
-          <!-- Deux copies de la même image (une seule requête réseau) : la
-               version grise porte un filtre STATIQUE, la version couleur est
-               révélée par un fondu d'opacité. Animer `filter` refiltrait
-               l'image à chaque frame du survol ; l'opacité, elle, reste sur
-               le compositeur. -->
-          <div class="project-card__zoom">
-            <img class="project-card__img" src="assets/img/projects/charlesmds.webp" alt="Aperçu du site de Charles Machado, coach sportif" width="1400" height="900" loading="lazy" decoding="async" />
-            <img class="project-card__img project-card__img--couleur" src="assets/img/projects/charlesmds.webp" alt="" aria-hidden="true" width="1400" height="900" loading="lazy" decoding="async" />
-          </div>
+      <article class="case" data-reveal aria-labelledby="case-charlesmds">
+        <!-- Doublon souris du lien principal : hors tabulation et masqué aux
+             lecteurs d'écran, qui passent par le lien texte plus bas. -->
+        <a class="case__media project-card__media" href="https://charlesmds.fr" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+          <!-- Deux copies de la même image (une seule requête : même srcset) :
+               la grise porte un filtre statique, la couleur arrive en fondu
+               d'opacité — composé, jamais refiltré pendant le survol. -->
+          <span class="project-card__zoom">
+            <img class="project-card__img" src="assets/img/projects/charlesmds.webp" srcset="assets/img/projects/charlesmds-800.webp 800w, assets/img/projects/charlesmds.webp 1400w" sizes="(max-width: 900px) 92vw, 720px" alt="" width="1400" height="900" loading="lazy" decoding="async" />
+            <img class="project-card__img project-card__img--couleur" src="assets/img/projects/charlesmds.webp" srcset="assets/img/projects/charlesmds-800.webp 800w, assets/img/projects/charlesmds.webp 1400w" sizes="(max-width: 900px) 92vw, 720px" alt="" width="1400" height="900" loading="lazy" decoding="async" />
+          </span>
+          <span class="case__url glass">charlesmds.fr<span class="case__url-arrow"><svg class="icon-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.4 11.6 11.6 4.4M6.2 4.4h5.4v5.4"/></svg></span></span>
+        </a>
+        <div class="case__body">
+          <p class="case__kicker"><span class="case__num">02</span><span class="chip">Site vitrine</span></p>
+          <h3 class="case__title" id="case-charlesmds">Charles Machado</h3>
+          <p class="case__lead">Le site d'un coach sportif, pensé pour transformer une visite en appel découverte.</p>
+          <dl class="case__facts">
+            <div class="case__fact">
+              <dt>Contexte</dt>
+              <dd>Un coach certifié BPJEPS qui propose des programmes d'entraînement personnalisés et un accompagnement en remise en forme.</dd>
+            </div>
+            <div class="case__fact">
+              <dt>Ce que j'ai réalisé</dt>
+              <dd>Le site vitrine : présentation des programmes, réservation d'un appel découverte, galerie de transformations et espace client.</dd>
+            </div>
+            <div class="case__fact">
+              <dt>Résultat</dt>
+              <dd>Site en ligne sur charlesmds.fr.</dd>
+            </div>
+          </dl>
+          <a class="case__link link-arrow" href="https://charlesmds.fr" target="_blank" rel="noopener">Voir le site en ligne<span class="sr-only"> : Charles Machado (nouvel onglet)</span><span aria-hidden="true"><svg class="icon-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.4 11.6 11.6 4.4M6.2 4.4h5.4v5.4"/></svg></span></a>
+          <p class="sr-only">Capture : page d'accueil du site de Charles Machado, portrait du coach et bouton de réservation d'appel.</p>
         </div>
-        <div class="project-card__body">
-          <span class="chip">Web</span>
-          <h3>Charles Machado — Coach sportif</h3>
-          <p>Site vitrine pour un coach certifié BPJEPS : programmes de remise en forme, réservation d'appel découverte, galerie de transformations et espace client.</p>
-          <span class="project-card__link">Voir le site <i class="project-card__arrow"><svg class="icon-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 8h10M9.2 4.2 13 8l-3.8 3.8"/></svg></i></span>
-        </div>
-      </a>
+      </article>
 
-      <a href="https://gregjvdr.github.io/Harmonie-Remake/" target="_blank" rel="noopener" class="project-card glass project-card--wide" data-reveal data-tilt>
-        <div class="project-card__media">
-          <!-- Deux copies de la même image (une seule requête réseau) : la
-               version grise porte un filtre STATIQUE, la version couleur est
-               révélée par un fondu d'opacité. Animer `filter` refiltrait
-               l'image à chaque frame du survol ; l'opacité, elle, reste sur
-               le compositeur. -->
-          <div class="project-card__zoom">
-            <img class="project-card__img" src="assets/img/projects/harmonie.webp" alt="Aperçu du site de l'Harmonie Fanfare Rudipontaine" width="1400" height="900" loading="lazy" decoding="async" />
-            <img class="project-card__img project-card__img--couleur" src="assets/img/projects/harmonie.webp" alt="" aria-hidden="true" width="1400" height="900" loading="lazy" decoding="async" />
-          </div>
+      <article class="case" data-reveal aria-labelledby="case-harmonie">
+        <!-- Doublon souris du lien principal : hors tabulation et masqué aux
+             lecteurs d'écran, qui passent par le lien texte plus bas. -->
+        <a class="case__media project-card__media" href="https://gregjvdr.github.io/Harmonie-Remake/" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+          <!-- Deux copies de la même image (une seule requête : même srcset) :
+               la grise porte un filtre statique, la couleur arrive en fondu
+               d'opacité — composé, jamais refiltré pendant le survol. -->
+          <span class="project-card__zoom">
+            <img class="project-card__img" src="assets/img/projects/harmonie.webp" srcset="assets/img/projects/harmonie-800.webp 800w, assets/img/projects/harmonie.webp 1400w" sizes="(max-width: 900px) 92vw, 720px" alt="" width="1400" height="900" loading="lazy" decoding="async" />
+            <img class="project-card__img project-card__img--couleur" src="assets/img/projects/harmonie.webp" srcset="assets/img/projects/harmonie-800.webp 800w, assets/img/projects/harmonie.webp 1400w" sizes="(max-width: 900px) 92vw, 720px" alt="" width="1400" height="900" loading="lazy" decoding="async" />
+          </span>
+          <span class="case__url glass">Harmonie-Remake<span class="case__url-arrow"><svg class="icon-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.4 11.6 11.6 4.4M6.2 4.4h5.4v5.4"/></svg></span></span>
+        </a>
+        <div class="case__body">
+          <p class="case__kicker"><span class="case__num">03</span><span class="chip">Refonte</span></p>
+          <h3 class="case__title" id="case-harmonie">Harmonie Fanfare Rudipontaine</h3>
+          <p class="case__lead">Plus d'un siècle d'histoire musicale, remis au goût du jour.</p>
+          <dl class="case__facts">
+            <div class="case__fact">
+              <dt>Contexte</dt>
+              <dd>Une association musicale fondée en 1922, qui réunit un orchestre et une école de musique.</dd>
+            </div>
+            <div class="case__fact">
+              <dt>Ce que j'ai réalisé</dt>
+              <dd>La refonte du site : présentation de l'orchestre, agenda des concerts, école de musique et historique du centenaire.</dd>
+            </div>
+            <div class="case__fact">
+              <dt>Résultat</dt>
+              <dd>Refonte consultable en ligne.</dd>
+            </div>
+          </dl>
+          <a class="case__link link-arrow" href="https://gregjvdr.github.io/Harmonie-Remake/" target="_blank" rel="noopener">Voir la refonte<span class="sr-only"> : Harmonie Fanfare Rudipontaine (nouvel onglet)</span><span aria-hidden="true"><svg class="icon-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.4 11.6 11.6 4.4M6.2 4.4h5.4v5.4"/></svg></span></a>
+          <p class="sr-only">Capture : page d'accueil de l'Harmonie Fanfare Rudipontaine, photo de groupe des musiciens dans une rue de la ville.</p>
         </div>
-        <div class="project-card__body">
-          <span class="chip">Web</span>
-          <h3>Harmonie Fanfare Rudipontaine</h3>
-          <p>Refonte du site d'une association musicale fondée en 1922&nbsp;: présentation de l'orchestre, agenda des concerts, école de musique et historique du centenaire.</p>
-          <span class="project-card__link">Voir le site <i class="project-card__arrow"><svg class="icon-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 8h10M9.2 4.2 13 8l-3.8 3.8"/></svg></i></span>
-        </div>
-      </a>
+      </article>
     </div>
   </section>
   </div>
 
-  <!-- ============ PANEL 4 : Process (balayage depuis la droite) ============ -->
+  <!-- ============ PANEL 4 : Méthode (balayage depuis la droite) ============ -->
   <div class="panel" data-panim="wipe-right">
   <section id="process" class="process section">
     <div class="section__head" data-title-drop>
       <p class="eyebrow">
-        <span class="tl-mask"><span class="tl-mask__inner">04 — Process</span></span>
+        <span class="tl-mask"><span class="tl-mask__inner">04 — Méthode</span></span>
       </p>
       <h2 class="title-lg">
         <span class="tl-mask"><span class="tl-mask__inner">Une méthode claire,</span></span>
@@ -436,28 +542,28 @@
     <ol class="timeline">
       <li class="timeline__item" data-reveal>
         <span class="timeline__num">01</span>
-        <div class="timeline__card glass">
+        <div class="timeline__card surface">
           <h3>Écoute &amp; analyse</h3>
           <p>On cadre le besoin réel, les objectifs et les contraintes techniques ou budgétaires.</p>
         </div>
       </li>
       <li class="timeline__item" data-reveal>
         <span class="timeline__num">02</span>
-        <div class="timeline__card glass">
+        <div class="timeline__card surface">
           <h3>Design &amp; prototype</h3>
           <p>Maquettes, direction artistique et expérience utilisateur, validées avant tout développement.</p>
         </div>
       </li>
       <li class="timeline__item" data-reveal>
         <span class="timeline__num">03</span>
-        <div class="timeline__card glass">
+        <div class="timeline__card surface">
           <h3>Développement</h3>
           <p>Code propre, performant et évolutif — ou montage &amp; configuration matérielle rigoureuse.</p>
         </div>
       </li>
       <li class="timeline__item" data-reveal>
         <span class="timeline__num">04</span>
-        <div class="timeline__card glass">
+        <div class="timeline__card surface">
           <h3>Livraison &amp; support</h3>
           <p>Déploiement, formation à l'usage, puis maintenance et dépannage sur la durée.</p>
         </div>
@@ -490,24 +596,35 @@
         </div>
 
         <p class="contact__text" data-reveal-text>
-          <strong>SaaS</strong>, <strong>site web</strong>, <strong>identité visuelle</strong> ou
-          <strong>PC en panne</strong> — écrivez-moi, je réponds rapidement.
+          Un <strong>site vitrine</strong>, une <strong>boutique en ligne</strong>, une
+          <strong>application</strong> — ou un <strong>PC en panne</strong>. Décrivez votre
+          projet en quelques lignes&nbsp;: je vous réponds sous 24&nbsp;h.
         </p>
 
-        <!-- Remplace l'e-mail ci-dessous si besoin -->
-        <a href="mailto:gregjvdr@gmail.com" class="btn btn--glass btn--lg contact__cta">
-          <span data-scramble>gregjvdr@gmail.com</span>
-          <svg class="contact__cta-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
+        <!-- Le lien ouvre un e-mail déjà structuré (type, objectif, délai,
+             budget) : la première réponse peut être utile au lieu d'être une
+             liste de questions. -->
+        <div class="contact__actions">
+          <a href="mailto:gregjvdr@gmail.com?subject=Projet%20web%20%E2%80%94%20&amp;body=Bonjour%20Gr%C3%A9goire%2C%0A%0AType%20de%20projet%20%28site%20vitrine%2C%20e-commerce%2C%20application%E2%80%A6%29%20%3A%20%0AObjectif%20principal%20%3A%20%0AD%C3%A9lai%20souhait%C3%A9%20%3A%20%0ABudget%20indicatif%20%3A%20%0A%0AMerci%20%21" class="btn btn--glass btn--lg contact__cta">
+            <span>gregjvdr@gmail.com</span>
+            <svg class="contact__cta-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <!-- Sans client mail configuré (poste de travail, webmail), mailto
+               ne fait rien : copier l'adresse reste toujours possible. -->
+          <button type="button" class="contact__copy" data-copy="gregjvdr@gmail.com">
+            <span class="contact__copy-label">Copier l'adresse</span>
+          </button>
+          <span class="sr-only" role="status" aria-live="polite" id="copyStatus"></span>
+        </div>
 
         <div class="contact__socials">
-          <a href="https://www.linkedin.com/in/gregjvdr/" target="_blank" rel="noopener" aria-label="LinkedIn" class="social-btn glass" data-reveal>
+          <a href="https://www.linkedin.com/in/gregjvdr/" target="_blank" rel="noopener" aria-label="LinkedIn (nouvel onglet)" class="social-btn glass" data-reveal>
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5ZM.24 8.25h4.5V23H.24V8.25ZM8.5 8.25h4.32v2.02h.06c.6-1.14 2.07-2.34 4.26-2.34 4.56 0 5.4 3 5.4 6.9V23h-4.5v-6.98c0-1.67-.03-3.8-2.32-3.8-2.33 0-2.69 1.82-2.69 3.7V23H8.5V8.25Z"/></svg>
           </a>
-          <a href="https://github.com/GregJVDR" target="_blank" rel="noopener" aria-label="GitHub" class="social-btn glass" data-reveal>
+          <a href="https://github.com/GregJVDR" target="_blank" rel="noopener" aria-label="GitHub (nouvel onglet)" class="social-btn glass" data-reveal>
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.73.5.5 5.73.5 12c0 5.08 3.29 9.39 7.86 10.91.57.1.78-.25.78-.55v-2.15c-3.2.7-3.88-1.36-3.88-1.36-.52-1.34-1.28-1.7-1.28-1.7-1.04-.72.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.75 2.7 1.25 3.35.96.1-.75.4-1.25.73-1.54-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.24 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.7 5.4-5.27 5.69.42.36.78 1.08.78 2.17v3.22c0 .3.21.66.79.55A10.52 10.52 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5Z"/></svg>
           </a>
-          <a href="https://www.instagram.com/greg.jvdr/" target="_blank" rel="noopener" aria-label="Instagram" class="social-btn glass" data-reveal>
+          <a href="https://www.instagram.com/greg.jvdr/" target="_blank" rel="noopener" aria-label="Instagram (nouvel onglet)" class="social-btn glass" data-reveal>
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.7 3.7 0 0 1-1.38-.9 3.7 3.7 0 0 1-.9-1.38c-.16-.42-.36-1.06-.41-2.23-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41 1.27-.06 1.65-.07 4.85-.07ZM12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63c-.8.31-1.47.72-2.14 1.39A5.9 5.9 0 0 0 .6 4.14C.3 4.9.1 5.78.05 7.05 0 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91.31.8.72 1.47 1.39 2.14a5.9 5.9 0 0 0 2.14 1.39c.76.3 1.64.5 2.91.56C8.33 24 8.74 24 12 24s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56.8-.31 1.47-.72 2.14-1.39a5.9 5.9 0 0 0 1.39-2.14c.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91a5.9 5.9 0 0 0-1.39-2.14A5.9 5.9 0 0 0 19.86.63c-.76-.3-1.64-.5-2.91-.56C15.67.01 15.26 0 12 0Zm0 5.84A6.16 6.16 0 1 0 12 18.16 6.16 6.16 0 0 0 12 5.84Zm0 10.16a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm6.41-10.4a1.44 1.44 0 1 1-2.88 0 1.44 1.44 0 0 1 2.88 0Z"/></svg>
           </a>
         </div>
@@ -521,17 +638,17 @@
 <footer class="footer">
   <div class="footer__grid">
     <div class="footer__brand" data-reveal>
-      <a href="#hero" class="footer__logo">GJ<span class="dot">.</span></a>
-      <p class="footer__tag">Développeur SaaS &amp; créateur digital.<br />Je conçois, je code, je répare.</p>
+      <a href="#hero" class="footer__logo" aria-label="Retour en haut de page">GJ<span class="dot" aria-hidden="true">.</span></a>
+      <p class="footer__tag">Développeur web freelance.<br />Je conçois, je code, je répare.</p>
     </div>
 
     <nav class="footer__col" aria-label="Plan du site" data-reveal>
       <h3>Navigation</h3>
       <a href="#hero" data-scramble>Accueil</a>
       <a href="#about" data-scramble>À propos</a>
-      <a href="#services" data-scramble>Compétences</a>
-      <a href="#projects" data-scramble>Projets</a>
-      <a href="#process" data-scramble>Process</a>
+      <a href="#services" data-scramble>Services</a>
+      <a href="#projects" data-scramble>Réalisations</a>
+      <a href="#process" data-scramble>Méthode</a>
       <a href="#contact" data-scramble>Contact</a>
     </nav>
 
@@ -555,12 +672,12 @@
   <div class="footer__bottom">
     <p>&copy; <span id="year"></span> Grégoire Jury--Vermot des Roches. Tous droits réservés.</p>
     <a href="#hero" class="back-to-top glass" aria-label="Retour en haut">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </a>
   </div>
 </footer>
 
-<script src="assets/js/smooth-scroll.js"></script>
-<script src="assets/js/main.js"></script>
+<script src="assets/js/smooth-scroll.js" defer></script>
+<script src="assets/js/main.js" defer></script>
 </body>
 </html>

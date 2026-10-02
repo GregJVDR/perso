@@ -20,7 +20,12 @@ svg { display: block; }
   --black-3: #101010;
   --white: #f4f1e8;
   --white-dim: rgba(244, 241, 232, .68);
-  --white-faint: rgba(244, 241, 232, .4);
+  /* Texte secondaire : .55 donne 5,7:1 sur le noir (AA). L'ancienne valeur,
+     .40, plafonnait à 3,4:1 — sous le seuil de 4,5:1 exigé pour du texte
+     courant. Les usages purement décoratifs (bandeau, rail, masqués aux
+     lecteurs d'écran) gardent l'ancien gris via --white-ghost. */
+  --white-faint: rgba(244, 241, 232, .55);
+  --white-ghost: rgba(244, 241, 232, .4);
 
   --paper: #ece3d1;
   --ink: #0b0b0a;
@@ -37,6 +42,17 @@ svg { display: block; }
   --glass-bg-dark-strong: rgba(11, 11, 10, .07);
   --glass-border-dark: rgba(11, 11, 10, .14);
   --blur: 22px;
+
+  /* Liseré spéculaire du verre : la lumière accroche l'arête haute-gauche et
+     s'éteint vers le bas, comme sur une vitre épaisse éclairée par au-dessus.
+     C'est ce filet, plus que le flou, qui fait lire une surface comme du
+     verre ; il reste lisible là où le flou n'a rien à flouter. */
+  --rim-light: linear-gradient(150deg, rgba(255,255,255,.62), rgba(255,255,255,.12) 30%, rgba(255,255,255,.04) 55%, rgba(255,255,255,.2));
+  --rim-dark: linear-gradient(150deg, rgba(255,255,255,.95), rgba(255,255,255,.35) 35%, rgba(11,11,10,.08) 70%, rgba(11,11,10,.14));
+
+  /* Anneau de focus : sa couleur suit le fond (voir .hero, .panel--light).
+     Blanc partout, il disparaissait sur le crème du hero et des services. */
+  --focus: #f4f1e8;
 
   --radius-xl: 40px;
   --radius-lg: 28px;
@@ -80,10 +96,46 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid var(--white);
+  outline: 2px solid var(--focus);
   outline-offset: 3px;
-  border-radius: 4px;
 }
+/* fonds clairs : l'anneau passe à l'encre */
+.hero,
+.panel--light { --focus: #0b0b0a; }
+/* les pastilles et boutons arrondis gardent leur forme sous l'anneau */
+.btn:focus-visible,
+.chip:focus-visible,
+.social-btn:focus-visible,
+.back-to-top:focus-visible,
+.nav__burger:focus-visible,
+.hero__scroll:focus-visible { outline-offset: 4px; }
+
+/* Texte réservé aux lecteurs d'écran (précisions « nouvel onglet », etc.) */
+.sr-only {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Lien texte avec flèche qui glisse au survol — utilisé hors boutons */
+.link-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 2px;
+  /* cible tactile : la zone s'élargit sans changer le dessin */
+  padding-block: 10px 2px;
+  margin-block: -10px 0;
+}
+.link-arrow > span { display: inline-flex; transition: transform .4s var(--ease-glass); }
+.link-arrow:hover > span { transform: translate(3px, -3px); }
 
 .skip-link {
   position: fixed;
@@ -97,6 +149,8 @@ body {
   transition: top .3s var(--ease);
 }
 .skip-link:focus { top: 16px; }
+/* pastille claire, souvent sur le hero crème : anneau à l'encre */
+.skip-link:focus-visible { outline-color: var(--ink); }
 
 /* ---------- Typography helpers ---------- */
 .eyebrow {
@@ -177,9 +231,31 @@ body {
 }
 .about__portrait.in-view::after,
 [data-reveal].in-view .project-card__media::after { transform: translateY(-101%); }
-/* la carte large part avec un souffle de retard, comme les cascades existantes */
-.projects__grid [data-reveal]:nth-child(2) .project-card__media::after { transition-delay: .1s; }
-.projects__grid [data-reveal]:nth-child(3) .project-card__media::after { transition-delay: .2s; }
+
+/* Les blocs qui portent une photo sortent du dévoilement générique
+   [data-reveal] : monter de 44px en scale(.96) sous un blur(5px) PENDANT que
+   le rideau remonte, cela faisait trois mouvements concurrents sur une même
+   image, et le flou d'entrée date. Le cadre reste désormais immobile ; tout
+   se joue à l'intérieur. Seule l'opacité est conservée, pour que le filet du
+   cadre n'apparaisse pas d'un coup. */
+.about__portrait[data-reveal],
+.cases .case[data-reveal] {
+  transform: none;
+  filter: none;
+}
+
+/* Le repos de l'image : elle démarre légèrement agrandie et se pose pendant
+   que le rideau la découvre — le cadrage se resserre au fil du dévoilement,
+   au lieu que la photo arrive déjà figée. Plus lente que le rideau, elle
+   finit son mouvement après lui.
+   Écrit en `scale` (propriété indépendante) et NON en `transform` : la
+   parallaxe du portrait et le zoom au survol des cartes écrivent tous deux
+   dans `transform`, et écraseraient l'animation. */
+.about__portrait img,
+.project-card__zoom { scale: 1.07; }
+.about__portrait img { transition: scale 1.5s var(--ease-glass); }
+.about__portrait.in-view img,
+[data-reveal].in-view .project-card__zoom { scale: 1; }
 
 /* Cascades supplémentaires, dans la continuité de celles déjà en place */
 .services__grid [data-svc]:nth-child(2) { transition-delay: .08s; }
@@ -201,8 +277,8 @@ body {
   gap: 16px;
   transform: translateY(-50%);
   pointer-events: none;
-  color: var(--white-faint);
-  font-size: .62rem;
+  color: var(--white-ghost);
+  font-size: .7rem;
   letter-spacing: .22em;
   text-transform: uppercase;
   opacity: 0;
@@ -244,6 +320,8 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .about__portrait::after,
   .project-card__media::after { display: none; }
+  .about__portrait img,
+  .project-card__zoom { scale: 1; transition: none; }
 }
 
 /* ---------- Grain overlay ---------- */
@@ -306,6 +384,35 @@ body {
   pointer-events: none;
   mix-blend-mode: overlay;
 }
+/* Liseré : un dégradé peint sur 1px, découpé par masque en anneau (le
+   centre est retiré par composition XOR). Un border-image ne suit pas les
+   arrondis, d'où le pseudo-élément. */
+.glass::after,
+.btn--glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  padding: 1px;
+  border-radius: inherit;
+  background: var(--rim-light);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+.btn--glass { position: relative; }
+.nav--on-light .nav__inner.glass::after { background: var(--rim-dark); }
+
+/* Surface « filet » : pour les blocs posés sur du noir uni, où le verre n'a
+   rien à réfracter. Même géométrie que le verre, sans backdrop-filter. */
+.surface {
+  position: relative;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.015));
+  border: 1px solid rgba(255, 255, 255, .1);
+}
+
 /* Dark glass — for glass surfaces sitting on the light hero */
 .glass--dark {
   background:
@@ -393,7 +500,7 @@ body {
   will-change: transform;
 }
 .cursor__dot {
-  width: 8px; height: 8px;
+  width: 5px; height: 5px;
   background: var(--white);
   mix-blend-mode: difference;
 }
@@ -404,22 +511,25 @@ body {
   inherits: false;
   initial-value: 1;
 }
+/* Anneau volontairement discret : un simple filet, sans fond ni
+   backdrop-filter. Le disque givré de 42 px masquait le texte qu'il survolait
+   et attirait l'oeil plus que le contenu. Le mix-blend-mode reprend celui du
+   point : le filet reste lisible sur l'encre comme sur le papier, sans avoir
+   à changer de couleur d'un panneau à l'autre. */
 .cursor__ring {
-  width: 42px; height: 42px;
-  border: 1px solid rgba(255,255,255,.5);
-  background: rgba(255,255,255,.04);
-  backdrop-filter: blur(4px);
+  width: 26px; height: 26px;
+  border: 1px solid rgba(255,255,255,.32);
+  mix-blend-mode: difference;
   /* L'anneau grossissait en animant width/height, deux propriétés de mise en
      page : chaque entrée sur un lien ou une carte relayoutait la page pendant
      350 ms — précisément au moment du survol. On met à l'échelle à la place,
      via une variable reprise dans le transform posé par le JS. */
   --ring-scale: 1;
-  transition: --ring-scale .35s var(--ease-glass), border-color .35s ease, background .35s ease;
+  transition: --ring-scale .35s var(--ease-glass), border-color .35s ease;
 }
 .cursor.is-active .cursor__ring {
-  --ring-scale: 1.667;
-  border-color: rgba(255,255,255,.8);
-  background: rgba(255,255,255,.08);
+  --ring-scale: 1.4;
+  border-color: rgba(255,255,255,.6);
 }
 @media (hover: none), (pointer: coarse) {
   .cursor { display: none; }
@@ -471,14 +581,16 @@ body {
   opacity: 0;
   filter: blur(14px);
   transform: translateY(26px) scale(1.35);
+  /* resserrée pour tenir dans le plancher de 1,3 s du préchargeur :
+     dernière lettre posée à .48 + .8 = 1,28 s */
   animation:
-    preloaderLetterIn 1.1s var(--ease) forwards,
-    preloaderBreathe 3.4s ease-in-out 1.1s infinite;
+    preloaderLetterIn .8s var(--ease) forwards,
+    preloaderBreathe 3.4s ease-in-out .8s infinite;
 }
-.preloader__letter:nth-child(2) { animation-delay: .18s, 1.28s; }
-.preloader__letter:nth-child(3) { animation-delay: .36s, 1.46s; }
-.preloader__letter:nth-child(4) { animation-delay: .54s, 1.64s; }
-.preloader__letter:nth-child(5) { animation-delay: .72s, 1.82s; }
+.preloader__letter:nth-child(2) { animation-delay: .12s, .92s; }
+.preloader__letter:nth-child(3) { animation-delay: .24s, 1.04s; }
+.preloader__letter:nth-child(4) { animation-delay: .36s, 1.16s; }
+.preloader__letter:nth-child(5) { animation-delay: .48s, 1.28s; }
 @keyframes preloaderLetterIn {
   0%   { opacity: 0; filter: blur(14px); transform: translateY(26px) scale(1.35); }
   60%  { opacity: 1; filter: blur(0); }
@@ -503,6 +615,8 @@ body {
   .preloader__letter { animation: none; opacity: 1; filter: none; transform: none; }
 }
 .preloader.is-done { opacity: 0; visibility: hidden; pointer-events: none; }
+/* déjà vu dans la session : jamais affiché (classe posée dans le <head>) */
+html.deja-vu .preloader { display: none; }
 /* `visibility: hidden` ne suspend pas les animations : les cinq lettres
    continuaient de respirer indéfiniment derrière la page une fois le
    préchargeur parti. */
@@ -611,6 +725,13 @@ html.js .nav:not(.nav--in) {
   box-shadow: inset 0 1px 0 rgba(255,255,255,.7), 0 10px 30px -14px rgba(11,11,10,.3);
 }
 .nav--on-light .nav__burger span { background: var(--ink); }
+.nav--on-light .nav__cta::after { background: var(--rim-dark); }
+/* Entre 901 et 1100px, six liens et le bouton ne tiennent plus dans la
+   pilule à leur taille d'origine : on resserre au lieu de laisser déborder. */
+@media (min-width: 901px) and (max-width: 1100px) {
+  .nav__link { padding: 10px 11px; font-size: .82rem; }
+  .nav__inner { padding-left: 18px; max-width: none; }
+}
 
 @media (max-width: 900px) {
   .nav__links, .nav__cta { display: none; }
@@ -633,9 +754,16 @@ html.js .nav:not(.nav--in) {
   padding: 14px;
   border-radius: var(--radius-lg);
   opacity: 0;
-  transform: translateY(-14px);
+  visibility: hidden;
+  transform: translateY(-14px) scale(.985);
+  transform-origin: top center;
   pointer-events: none;
-  transition: opacity .4s var(--ease), transform .4s var(--ease);
+  /* visibility bascule APRÈS le fondu de fermeture, et tout de suite à
+     l'ouverture : le menu reste visible pendant qu'il s'efface. */
+  transition: opacity .4s var(--ease), transform .5s var(--ease-glass), visibility 0s linear .4s, box-shadow .5s ease;
+  max-height: calc(100svh - 110px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 /* Le menu hérite de .glass, qui prend la teinte de ce qu'il recouvre : ouvert
    au-dessus du hero clair il virait au crème, et les liens — blancs, hérités
@@ -654,9 +782,33 @@ html.js .nav:not(.nav--in) {
   border-bottom: 1px solid rgba(255,255,255,.08);
 }
 .mobile-menu a.is-active { color: var(--white); font-weight: 600; }
-.mobile-menu a:last-child { border-bottom: none; }
+.mobile-menu a:nth-last-child(2) { border-bottom: none; }
+/* Action principale en pied de menu : c'est ce qu'un visiteur mobile vient
+   chercher, il ne devrait pas avoir à redescendre jusqu'au formulaire. */
+.mobile-menu a.mobile-menu__cta {
+  margin-top: 10px;
+  min-height: 54px;
+  border-bottom: none;
+  background: var(--white);
+  color: var(--black);
+  font-size: 1rem;
+  font-weight: 650;
+}
 @media (max-width: 900px) { .mobile-menu { display: flex; } }
-.mobile-menu.is-open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.mobile-menu.is-open {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  pointer-events: auto;
+  transition: opacity .4s var(--ease), transform .5s var(--ease-glass), visibility 0s, box-shadow .5s ease;
+  /* voile sur la page, sans élément supplémentaire : une ombre de rayon nul
+     mais d'étalement immense. Un clic dessus ferme le menu (voir main.js). */
+  box-shadow: 0 0 0 100vmax rgba(3, 3, 3, .45), 0 30px 60px -20px rgba(0,0,0,.6);
+}
+@media (prefers-reduced-motion: reduce) {
+  .mobile-menu, .mobile-menu.is-open { transition: opacity .2s linear, visibility 0s linear .2s; transform: none; }
+  .mobile-menu.is-open { transition: opacity .2s linear; }
+}
 
 /* ---------- Hero (centré · nom derrière/devant) ----------
    .hero__editorial et .hero__media sont des conteneurs de composition
@@ -669,7 +821,6 @@ html.js .nav:not(.nav--in) {
 .hero__rule,
 .hero__badge,
 .hero__pill,
-.hero__baseline,
 .hero__scroll,
 .btn__arrow { display: none; }
 
@@ -683,6 +834,11 @@ html.js .nav:not(.nav--in) {
   overflow: hidden;
   background: var(--paper);
   color: var(--ink);
+  /* Barre du bas (accroche + boutons) : sa position et sa hauteur sont
+     déclarées ici pour que la ligne basse du nom puisse s'en écarter par
+     calcul, au lieu d'une valeur qui ne tiendrait qu'à une taille d'écran. */
+  --foot-bottom: clamp(24px, 4vh, 48px);
+  --foot-h: 62px;
 }
 .hero::before {
   content: "";
@@ -723,7 +879,8 @@ html.js .nav:not(.nav--in) {
 }
 /* plancher à 112px pour que l'accent du É passe sous la nav (18px + ~64px) */
 .line--top    { top: clamp(112px, 15vh, 20%); }
-.line--bottom { bottom: clamp(7%, 11vh, 15%); }
+/* jamais plus bas que le haut de la barre accroche/boutons, plus une marge */
+.line--bottom { bottom: max(clamp(7%, 11vh, 15%), calc(var(--foot-bottom) + var(--foot-h) + 16px)); }
 
 /* Centered portrait — Apple liquid-glass pane, photo slightly magnified inside */
 .hero__portrait {
@@ -731,7 +888,9 @@ html.js .nav:not(.nav--in) {
   top: 50%;
   left: 50%;
   z-index: 2;
-  width: min(90vw, 860px);
+  /* borne en vh : sur un écran bas (1024x768) le cadre de 860px masquait
+     presque toute la ligne basse du nom. Sans effet dès 935px de haut. */
+  width: min(90vw, 860px, 92vh);
   aspect-ratio: 1672 / 941; /* greg.png */
   height: auto;
   transform: translate(-50%, -50%);
@@ -766,6 +925,29 @@ html.js .nav:not(.nav--in) {
    maintenait en mémoire un calque GPU aux dimensions du portrait alors que
    rien ne bouge tant que le pointeur n'est pas dessus. */
 .hero__portrait:hover .hero__img { transform: scale(1.1); will-change: transform; }
+/* Réfraction : la photo glisse de quelques pixels À L'OPPOSÉ du pointeur,
+   comme vue à travers une lentille épaisse. `translate` est indépendant de
+   `transform` (qui porte le zoom) : les deux se composent. Le zoom de 1.06
+   laisse ~25px de marge, l'amplitude reste bien en deçà. */
+.hero__img { transition: transform 1.4s var(--ease-glass), translate 1.1s var(--ease-glass); }
+.hero__portrait.is-lit .hero__img { translate: calc(var(--rx, 0) * 1px) calc(var(--ry, 0) * 1px); }
+
+/* Lumière spéculaire qui suit le pointeur (ou le défilement, au doigt) :
+   le seul élément interactif du hero, et il ne coûte qu'un dégradé déplacé
+   par deux variables — aucun recalcul de mise en page. */
+.hero__glint {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    radial-gradient(38% 52% at var(--gx, 28%) var(--gy, 18%), rgba(255, 255, 255, .42), rgba(255, 255, 255, .1) 45%, transparent 70%);
+  mix-blend-mode: soft-light;
+  opacity: 0;
+  transition: opacity .7s var(--ease);
+}
+.hero__portrait.is-lit .hero__glint { opacity: 1; }
 /* specular sheen + edge refraction, like Apple's liquid glass */
 .hero__portrait::before {
   content: "";
@@ -830,20 +1012,63 @@ html.js .nav:not(.nav--in) {
   50%      { transform: translateY(calc(-50% + 6px)); }
 }
 
-/* Bottom block: CTA */
+/* Barre du bas : accroche à gauche, boutons à droite, sous le nom. C'est la
+   seule bande libre de l'écran à toutes les tailles de bureau : les côtés
+   sont pris par la photo sous 1200px (les anciennes mentions d'angle la
+   chevauchaient à 820 et 1024px). Le décalage à droite laisse la place au
+   repère "Scroll" vertical. */
 .hero__foot {
   position: absolute;
-  left: 50%;
-  bottom: clamp(28px, 4.5vh, 52px);
+  left: var(--gutter);
+  right: calc(var(--gutter) + 40px);
+  bottom: var(--foot-bottom);
   z-index: 5;
-  width: min(760px, 92vw);
-  transform: translateX(-50%);
   display: flex;
-  flex-direction: column;
   align-items: center;
-  text-align: center;
+  justify-content: space-between;
+  gap: 16px 40px;
+  text-align: left;
 }
-.hero__cta { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+.hero__pitch {
+  flex: 1 1 auto;
+  min-width: 0;
+  /* deux lignes : à trois, elle dépassait la hauteur réservée à la barre et
+     venait toucher le pied des lettres du nom */
+  max-width: 50ch;
+  font-size: clamp(.95rem, 1.1vw, 1.06rem);
+  line-height: 1.45;
+  color: var(--ink-dim);
+  text-wrap: pretty;
+  animation: heroCtaIn .75s var(--ease) .45s backwards;
+}
+.hero__pitch strong { color: var(--ink); font-weight: 650; }
+/* les boutons ne se replient jamais sur deux rangs : c'est l'accroche qui
+   cède de la largeur (à 1024px, le second rang montait sur le nom) */
+.hero__cta { flex: none; display: flex; gap: 12px; justify-content: flex-end; }
+/* Bouton principal plein, encre sur papier : l'action attendue se voit
+   avant tout le reste. Le secondaire reste un simple filet. */
+.hero__cta .btn--glass-dark {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: 0 14px 30px -16px rgba(11, 11, 10, .65);
+}
+.hero__cta .btn--glass-dark:hover { box-shadow: 0 20px 40px -18px rgba(11, 11, 10, .7); }
+
+/* Entre 769 et 1199px les côtés appartiennent à la photo : les mentions
+   d'angle la chevauchaient. L'accroche du bas porte déjà le message. */
+@media (min-width: 769px) and (max-width: 1199px) {
+  .hero__meta { display: none; }
+}
+/* Tablette en portrait : la barre passe sur deux rangs centrés (accroche
+   au-dessus des boutons) ; la hauteur est là, pas la largeur. */
+@media (min-width: 769px) and (max-width: 1099px) and (orientation: portrait) {
+  .hero { --foot-h: 132px; }
+  .hero__foot { flex-direction: column; justify-content: flex-end; text-align: center; right: var(--gutter); }
+  .hero__cta { justify-content: center; }
+}
 /* Entrée au chargement, jamais liée au scroll : ces boutons sont au-dessus de
    la ligne de flottaison. Ils portaient [data-reveal], dont l'observer mesure
    la boîte TRANSFORMÉE (translateY(44px)) ; combinée au rootMargin négatif de
@@ -970,9 +1195,11 @@ html.js .nav:not(.nav--in) {
     display: block;
     transform: none;
     writing-mode: horizontal-tb;
-    font-size: clamp(.56rem, 2.6vw, .68rem);
+    /* plancher à 11px : à 10px et moins, ces capitales espacées devenaient
+       un motif plus qu'un texte */
+    font-size: clamp(.69rem, 2.9vw, .76rem);
     line-height: 1.5;
-    letter-spacing: .16em;
+    letter-spacing: .13em;
     text-transform: uppercase;
     color: var(--ink-dim);
     white-space: nowrap;
@@ -1101,13 +1328,13 @@ html.js .nav:not(.nav--in) {
     bottom: 13%;
     /* étroite volontairement : le libellé se répartit sur trois lignes et la
        pastille déborde légèrement du bord droit de la photo */
-    width: min(48vw, 196px);
+    width: min(54vw, 214px);
     padding: 11px 15px;
     border-radius: var(--radius-pill);
     background: var(--paper);
     border: 1px solid rgba(11, 11, 10, .1);
     box-shadow: 0 10px 26px -18px rgba(11, 11, 10, .45);
-    font-size: clamp(.5rem, 2.2vw, .6rem);
+    font-size: clamp(.66rem, 2.75vw, .72rem);
     line-height: 1.45;
     letter-spacing: .1em;
     text-transform: uppercase;
@@ -1146,16 +1373,15 @@ html.js .nav:not(.nav--in) {
     color: var(--ink-dim);
   }
 
-  /* ---- 6. Accroche ---- */
-  .hero__baseline {
-    order: 4;
-    display: block;
-    margin: clamp(4px, 1vh, 10px) 0 0;
+  /* ---- 6. Accroche ----
+     Remplace l'ancienne ligne de base (capitales de 9px, espacées) par une
+     vraie phrase à taille de lecture : c'est elle qui dit ce que je vends. */
+  .hero__pitch {
+    max-width: 31ch;
+    margin: 0 auto clamp(10px, 1.6vh, 16px);
     text-align: center;
-    font-size: clamp(.55rem, 2.5vw, .68rem);
-    letter-spacing: .28em;
-    text-transform: uppercase;
-    color: var(--ink-dim);
+    font-size: clamp(.9rem, 3.9vw, 1rem);
+    line-height: 1.42;
   }
 
   /* ---- 7. Boutons ---- */
@@ -1166,6 +1392,11 @@ html.js .nav:not(.nav--in) {
     width: auto;
     transform: none;
     padding: 0;
+    margin-top: clamp(8px, 1.4vh, 14px);
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    text-align: center;
   }
   .hero__cta {
     flex-direction: column;
@@ -1213,7 +1444,7 @@ html.js .nav:not(.nav--in) {
   .hero__scroll-text {
     padding-left: 14px;
     border-left: 1px solid var(--ink-faint);
-    font-size: clamp(.55rem, 2.4vw, .66rem);
+    font-size: clamp(.69rem, 2.9vw, .74rem);
     line-height: 1.6;
     letter-spacing: .22em;
     text-transform: uppercase;
@@ -1462,7 +1693,7 @@ html.js .hslide-spacer { height: 100vh; }
   font-size: clamp(1.4rem, 3vw, 2.4rem);
   font-weight: 650;
   letter-spacing: -0.01em;
-  color: var(--white-faint);
+  color: var(--white-ghost);
   text-transform: uppercase;
 }
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-33.333%); } }
@@ -1493,6 +1724,14 @@ html.js .hslide-spacer { height: 100vh; }
      photo, qui ne remplissait donc pas son cadre */
   padding: 0;
   aspect-ratio: 4 / 5;
+  /* Cadre photo et non plus panneau de verre : l'image le couvre en entier,
+     un backdrop-filter n'avait donc rien à flouter derrière elle. */
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, .12);
+  box-shadow: 0 30px 70px -34px rgba(0, 0, 0, .9);
 }
 .about__portrait img {
   width: 100%;
@@ -1598,7 +1837,6 @@ html.js .hslide-spacer { height: 100vh; }
 }
 @media (max-width: 760px) { .services__grid { grid-template-columns: 1fr; } }
 
-/* ---------- Skill bars (liquid) ---------- */
 /* ---------- Panneau clair (Compétences) — papier/encre comme le hero ---------- */
 .panel--light {
   background: var(--paper) url("../fond02.webp") center / cover no-repeat;
@@ -1636,7 +1874,7 @@ html.js .hslide-spacer { height: 100vh; }
 }
 .panel--light .section__head,
 .panel--light .services__grid,
-.panel--light .skillbars { position: relative; z-index: 1; }
+.panel--light .services__next { position: relative; z-index: 1; }
 
 .panel--light .eyebrow { color: var(--ink-dim); }
 
@@ -1703,76 +1941,55 @@ html.js .panel--light [data-svc].is-in {
   background: rgba(255, 255, 255, .3);
 }
 
-/* Barres de compétences réencrées */
-.panel--light .skillbars__title { color: var(--ink); }
-.panel--light .skillbar__label { color: var(--ink-dim); }
-.panel--light .skillbar__track {
-  background: rgba(11, 11, 10, .1);
-  border-color: rgba(11, 11, 10, .12);
+/* Relance en fin de section : une question, une action. */
+.services__next {
+  margin-top: clamp(40px, 6vw, 64px);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 14px;
+  font-size: clamp(1.02rem, 1.6vw, 1.2rem);
+  color: var(--ink-dim);
 }
-.panel--light .skillbar__fill {
-  background: linear-gradient(90deg, rgba(11, 11, 10, .75), var(--ink));
-  box-shadow: 0 0 14px rgba(11, 11, 10, .25);
-}
-.panel--light .skillbar__fill::after {
-  background: linear-gradient(120deg, transparent 20%, rgba(255, 255, 255, .35) 50%, transparent 80%);
-  background-size: 200% 100%;
-}
+.services__next .link-arrow { color: var(--ink); }
 
-.skillbars { margin-top: 90px; max-width: 720px; }
-.skillbars__title { font-size: 1.6rem; margin-bottom: 34px; }
-.skillbar { margin-bottom: 26px; }
-.skillbar__label {
-  display: flex; justify-content: space-between;
-  font-size: .9rem; color: var(--white-dim);
-  margin-bottom: 10px;
-}
-.skillbar__track {
-  height: 10px;
-  border-radius: var(--radius-pill);
-  background: rgba(255,255,255,.08);
-  border: 1px solid rgba(255,255,255,.1);
-  overflow: hidden;
-  position: relative;
-}
-.skillbar__fill {
-  position: relative;
-  height: 100%;
-  width: 0%;
-  border-radius: var(--radius-pill);
-  background: linear-gradient(90deg, rgba(245,245,247,.5), var(--white));
-  box-shadow: 0 0 16px rgba(255,255,255,.5);
-  transition: width 1.4s var(--ease-glass);
-  overflow: hidden;
-}
-.skillbar__fill::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -140%;
-  width: 200%;
-  height: 100%;
-  background: linear-gradient(120deg, transparent 20%, rgba(255,255,255,.6) 50%, transparent 80%);
-  animation: liquidShine 2.6s ease-in-out infinite;
-  will-change: transform;
-}
-@keyframes liquidShine {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(100%); }
-}
-
-/* ---------- Projects ---------- */
-.projects__grid {
+/* ---------- Réalisations : études de cas ----------
+   Chaque projet est une rangée : grand visuel (7/12) et récit (5/12), en
+   alternance gauche/droite. Le visuel garde les mécaniques d'origine —
+   rideau, repos de l'image, passage du gris à la couleur — d'où la
+   réutilisation des classes .project-card__*. */
+.cases {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
+  gap: clamp(88px, 11vw, 160px);
 }
-.project-card { display: block; }
+/* Section plus large que le conteneur commun : ce sont les captures qui
+   vendent, elles méritent la place. Visuel ~60 %, récit ~40 %. */
+.projects.section { max-width: 1400px; }
+.case {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  gap: clamp(32px, 5.5vw, 80px);
+  align-items: center;
+}
+/* en alternance, la colonne large suit le visuel : inverser seulement
+   l'ordre laissait la capture dans la colonne étroite */
+.case:nth-child(even) { grid-template-columns: minmax(0, 1fr) minmax(0, 1.55fr); }
+.case:nth-child(even) .case__media { order: 2; }
+
 .project-card__media {
-  aspect-ratio: 16/10;
   position: relative;
   overflow: hidden;
   background: linear-gradient(160deg, #1a1a1a, #050505);
+}
+/* 14:9, le format exact des captures (1400x900) : aucune coupe */
+.case__media {
+  display: block;
+  aspect-ratio: 14 / 9;
+  border-radius: var(--radius-lg);
+  isolation: isolate;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, .1),
+    0 50px 100px -50px rgba(0, 0, 0, .95);
 }
 /* Le zoom est porté par ce conteneur : une seule couche se transforme, les
    deux images restent alignées. */
@@ -1780,11 +1997,11 @@ html.js .panel--light [data-svc].is-in {
   position: absolute;
   inset: 0;
   transform: scale(1.02);
-  transition: transform .85s cubic-bezier(.33, .12, .2, 1);
+  /* `scale` listee ici et pas plus haut : cette regle redeclare `transition`
+     a specificite egale, elle aurait donc efface le dévoilement de l'image. */
+  transition: transform .85s cubic-bezier(.33, .12, .2, 1), scale 1.5s var(--ease-glass);
   will-change: transform;
 }
-.project-card:hover .project-card__zoom { transform: scale(1.08); }
-
 .project-card__img {
   position: absolute;
   inset: 0;
@@ -1804,28 +2021,154 @@ html.js .panel--light [data-svc].is-in {
   transition: opacity .8s cubic-bezier(.33, .12, .2, 1);
   will-change: opacity;
 }
-.project-card:hover .project-card__img--couleur { opacity: 1; }
-.project-card__body { padding: 30px 30px 34px; }
-.project-card__body h3 { font-size: 1.3rem; margin: 14px 0 10px; letter-spacing: -0.01em; }
-.project-card__body p { color: var(--white-dim); line-height: 1.55; margin-bottom: 20px; }
-.project-card__link {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-size: .88rem; font-weight: 600;
+/* tout le récit déclenche l'effet, pas seulement l'image : on survole un
+   projet, pas une vignette. :focus-within sert la navigation clavier. */
+.case:hover .project-card__zoom,
+.case:focus-within .project-card__zoom { transform: scale(1.05); }
+.case:hover .project-card__img--couleur,
+.case:focus-within .project-card__img--couleur { opacity: 1; }
+/* Au doigt il n'y a pas de survol : la capture « se développe » en couleur
+   une fois le rideau passé. */
+@media (hover: none) {
+  .case.in-view .project-card__img--couleur {
+    opacity: 1;
+    transition: opacity 1.4s ease .9s;
+  }
 }
-/* La flèche glisse par transform et non par `gap` : animer `gap` est une
-   animation de mise en page — mesuré, 37 layouts par survol. Le rendu est
-   identique, mais tout reste sur le compositeur. */
-.project-card__arrow { transition: transform .4s var(--ease-glass); }
-.project-card:hover .project-card__arrow { transform: translateX(6px); }
-/* même raison que les flèches du hero : caractère Unicode remplacé par un
-   SVG, pour un rendu identique sur toutes les plateformes */
-.project-card__arrow { display: inline-flex; font-size: 1.05em; }
-.project-card:hover {
-  transform: translateY(-6px);
-  border-color: rgba(255, 255, 255, .28);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .3),
-    0 30px 70px -25px rgba(0, 0, 0, .85);
+
+/* Pastille d'adresse : du verre posé SUR la capture — l'endroit où le flou
+   a vraiment quelque chose à réfracter. Sous le rideau (z 4), elle arrive
+   une fois le visuel découvert. */
+.case__url {
+  position: absolute;
+  left: clamp(12px, 2vw, 20px);
+  bottom: clamp(12px, 2vw, 20px);
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 13px 9px 16px;
+  border-radius: var(--radius-pill);
+  background: rgba(12, 12, 12, .5);
+  border: 0;
+  box-shadow: 0 10px 30px -12px rgba(0, 0, 0, .6);
+  font-size: .8rem;
+  font-weight: 600;
+  letter-spacing: .01em;
+  color: var(--white);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity .6s var(--ease) .8s, transform .8s var(--ease) .8s;
+}
+.case.in-view .case__url { opacity: 1; transform: none; }
+/* sélecteur doublé : la couche mobile retire flou et fond sombre à .glass
+   (inutiles sur du noir uni) — ici la pastille est posée sur une capture,
+   parfois très claire, et en a besoin pour rester lisible. Sa surface est
+   minuscule, le flou y coûte peu. */
+.case__url.glass {
+  background: rgba(12, 12, 12, .55);
+  backdrop-filter: blur(16px) saturate(170%);
+  -webkit-backdrop-filter: blur(16px) saturate(170%);
+}
+.case__url-arrow { display: inline-flex; transition: transform .4s var(--ease-glass); }
+.case:hover .case__url-arrow { transform: translate(2px, -2px); }
+
+.case__kicker {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.case__num {
+  font-size: .8rem;
+  font-weight: 600;
+  letter-spacing: .16em;
+  font-variant-numeric: tabular-nums;
+  color: var(--white-faint);
+}
+.case__title {
+  font-size: clamp(1.9rem, 3.3vw, 2.75rem);
+  line-height: 1.02;
+  letter-spacing: -0.028em;
+  font-weight: 650;
+  margin-bottom: 14px;
+  text-wrap: balance;
+}
+.case__lead {
+  max-width: 34ch;
+  margin-bottom: 30px;
+  font-size: clamp(1.02rem, 1.25vw, 1.15rem);
+  line-height: 1.5;
+  color: var(--white-dim);
+  text-wrap: pretty;
+}
+.case__facts {
+  margin-bottom: 30px;
+  border-top: 1px solid rgba(255, 255, 255, .1);
+}
+/* libellé au-dessus du contenu : dans une colonne de récit étroite, un
+   libellé placé à gauche lui volait un tiers de sa largeur */
+.case__fact {
+  display: grid;
+  gap: 6px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, .1);
+}
+.case__fact dt {
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--white-faint);
+}
+.case__fact dd {
+  font-size: .94rem;
+  line-height: 1.58;
+  color: var(--white-dim);
+}
+.case__link { font-size: .95rem; color: var(--white); }
+
+/* Le récit entre ligne après ligne une fois le bloc à l'écran ; le cadre,
+   lui, ne bouge pas (voir .cases .case[data-reveal] plus haut). */
+.case__body > * {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity .7s var(--ease), transform .9s var(--ease);
+}
+.case.in-view .case__body > * { opacity: 1; transform: none; }
+.case.in-view .case__body > :nth-child(2) { transition-delay: .07s; }
+.case.in-view .case__body > :nth-child(3) { transition-delay: .14s; }
+.case.in-view .case__body > :nth-child(4) { transition-delay: .21s; }
+.case.in-view .case__body > :nth-child(5) { transition-delay: .28s; }
+
+@media (max-width: 900px) {
+  .case,
+  .case:nth-child(even) { grid-template-columns: 1fr; gap: 28px; }
+  .case:nth-child(even) .case__media { order: 0; }
+  .case__lead { max-width: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .case__body > *, .case__url { opacity: 1; transform: none; transition: none; }
+}
+
+/* Lumière ambiante des sections sombres : deux halos statiques, peints une
+   fois. Sur du noir uni le verre n'a rien à réfracter ; ces nappes donnent
+   à la nav et aux pastilles une matière à travers laquelle se lire. */
+.projects,
+.process { isolation: isolate; }
+.projects::before,
+.process::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 calc(50% - 50vw);
+  pointer-events: none;
+  background:
+    radial-gradient(46% 32% at 88% 8%, rgba(236, 227, 209, .075), transparent 72%),
+    radial-gradient(40% 30% at 6% 62%, rgba(236, 227, 209, .045), transparent 72%);
+}
+.process::before {
+  background: radial-gradient(50% 45% at 20% 30%, rgba(236, 227, 209, .06), transparent 72%);
 }
 
 /* Suivi du pointeur : AUCUNE transition pendant le basculement. Une
@@ -1840,19 +2183,6 @@ html.js .panel--light [data-svc].is-in {
   will-change: transform;
 }
 
-.project-card--wide {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: 1.15fr 1fr;
-}
-.project-card--wide .project-card__media { aspect-ratio: auto; height: 100%; min-height: 300px; }
-.project-card--wide .project-card__body { display: flex; flex-direction: column; justify-content: center; padding: 40px 46px; }
-
-@media (max-width: 760px) {
-  .projects__grid { grid-template-columns: 1fr; }
-  .project-card--wide { grid-template-columns: 1fr; }
-}
-
 /* ---------- Process / Timeline ---------- */
 .timeline {
   display: grid;
@@ -1860,7 +2190,9 @@ html.js .panel--light [data-svc].is-in {
   gap: 20px;
   counter-reset: step;
 }
-.timeline__item { position: relative; }
+/* Colonne flex : c'est elle qui donne aux cartes leur hauteur commune sur
+   une rangée, sans passer par un height:100% sur la carte (voir plus bas). */
+.timeline__item { position: relative; display: flex; flex-direction: column; }
 .timeline__num {
   display: block;
   font-size: .85rem;
@@ -1870,7 +2202,15 @@ html.js .panel--light [data-svc].is-in {
 }
 .timeline__card {
   padding: 30px 26px;
-  height: 100%;
+  /* `height: 100%` ici résolvait à 100% de la hauteur de l'ÉLÉMENT parent,
+     alors que la carte n'en est que le second enfant : numéro + carte
+     dépassaient donc le parent de la hauteur du numéro et de sa marge,
+     ~32px. En quatre colonnes ce débordement tombait sous la rangée, dans
+     le vide, et restait invisible. En colonne unique il retombait sur le
+     numéro de l'étape suivante, que les 20px d'écart n'absorbaient pas.
+     `flex: 1` remplit la place restante après le numéro : même hauteur
+     commune sur une rangée, plus aucun débordement. */
+  flex: 1;
 }
 .timeline__card h3 { font-size: 1.15rem; margin-bottom: 10px; }
 .timeline__card p { color: var(--white-dim); font-size: .92rem; line-height: 1.55; }
@@ -2009,14 +2349,43 @@ html.js .panel--light [data-svc].is-in {
 }
 .contact__text strong { font-weight: 700; color: var(--white); }
 
-/* CTA email : la flèche glisse au survol (le texte scramble via data-scramble) */
-.contact__cta { position: relative; gap: 10px; }
+/* CTA email : seule la flèche bouge au survol. Le scramble a été retiré ici —
+   une adresse e-mail qui se brouille sous le pointeur au moment où on cherche
+   à la lire (ou à la copier) dessert le seul bouton d'action de la page. Il
+   reste sur les liens du pied de page, où il est décoratif.
+   nowrap repris de [data-scramble], que le span ne porte plus. */
+.contact__cta { position: relative; gap: 10px; white-space: nowrap; }
 .contact__cta-arrow {
   width: 17px; height: 17px;
   flex-shrink: 0;
   transition: transform .45s var(--ease-glass);
 }
 .contact__cta:hover .contact__cta-arrow { transform: translateX(5px); }
+
+.contact__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+}
+/* Action secondaire : un simple filet, pour ne pas concurrencer l'e-mail */
+.contact__copy {
+  min-height: 48px;
+  padding: 0 22px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, .18);
+  color: var(--white-dim);
+  font-size: .9rem;
+  font-weight: 600;
+  transition: color .3s ease, border-color .3s ease, background .3s ease;
+}
+.contact__copy:hover { color: var(--white); border-color: rgba(255, 255, 255, .4); }
+.contact__copy.is-copied {
+  color: var(--black);
+  background: var(--white);
+  border-color: var(--white);
+}
 
 .contact__socials { display: flex; gap: 14px; margin-top: 36px; }
 .social-btn {
@@ -2139,8 +2508,64 @@ html.js .panel--light [data-svc].is-in {
   .footer__grid { grid-template-columns: 1fr 1fr; }
   .footer__brand { grid-column: 1 / -1; }
 }
-@media (max-width: 520px) {
-  .footer__grid { grid-template-columns: 1fr; }
+/* ---------- Pied de page compact (téléphone) ----------
+   Empilés verticalement, les douze liens du pied de page occupaient à eux
+   seuls plus de 500px : chacun fait 42px de haut une fois la cible tactile
+   respectée, et une colonne de six liens vaut donc un tiers d'écran. Le
+   pied complet montait à 978px pour un écran de 757 — on scrollait plus
+   d'un écran et demi de pied de page.
+   La correction ne touche PAS aux cibles tactiles (44px reste le minimum
+   confortable au doigt, cf. la règle pointer:coarse) : on remet les liens
+   EN LIGNE. Six liens sur deux rangs au lieu de six rangs, c'est la même
+   surface touchable pour un quart de la hauteur.
+   Chaque groupe prend toute la largeur plutôt que d'être mis en colonnes :
+   sur un écran de 320px, deux colonnes ne laissent que ~130px et l'adresse
+   e-mail, en white-space:nowrap pour le scramble, déborderait. */
+@media (max-width: 560px) {
+  .footer { padding: 44px var(--gutter) 26px; }
+
+  .footer__grid {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+
+  .footer__tag {
+    margin-top: 10px;
+    font-size: .9rem;
+    line-height: 1.55;
+  }
+
+  /* Les liens deviennent une ligne qui se replie ; le titre du groupe garde
+     son rang à lui via flex-basis, sans quoi il se mêlerait aux liens. */
+  .footer__col {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    /* L'écart seul sépare les liens, sans point médian intercalaire : le
+       repli étant décidé par le navigateur, un séparateur en ::after se
+       retrouve fatalement orphelin en bout de rang sur l'élément qui tombe
+       en fin de ligne, et aucune règle CSS ne peut savoir lequel c'est. */
+    column-gap: 22px;
+  }
+  .footer__col h3 {
+    flex: 0 0 100%;
+    margin-bottom: 2px;
+  }
+  .footer__col a,
+  .footer__col span { width: auto; }
+
+  .footer__watermark {
+    margin-top: 26px;
+    font-size: clamp(2.6rem, 15vw, 4.4rem);
+    -webkit-text-stroke-width: 1.5px;
+  }
+
+  .footer__bottom {
+    margin-top: 22px;
+    padding-top: 18px;
+    gap: 14px;
+    font-size: .76rem;
+  }
 }
 .back-to-top {
   width: 44px; height: 44px;
@@ -2184,8 +2609,6 @@ html.js .panel--light [data-svc].is-in {
 .section__head [data-reveal]:nth-child(2) { transition-delay: .14s; }
 
 /* Cascades par groupe */
-.projects__grid [data-reveal]:nth-child(2) { transition-delay: .1s; }
-.projects__grid [data-reveal]:nth-child(3) { transition-delay: .2s; }
 
 .timeline [data-reveal]:nth-child(2) { transition-delay: .1s; }
 .timeline [data-reveal]:nth-child(3) { transition-delay: .2s; }
@@ -2209,6 +2632,182 @@ html.js .panel--light [data-svc].is-in {
   transition-delay: .15s;
 }
 .footer__watermark[data-reveal].in-view { transform: none; }
+
+
+/* ==========================================================================
+   COUCHE MOUVEMENT MOBILE (<= 860px)
+
+   Sur téléphone le défilement est tactile et continu : il n'y a pas de
+   crans de molette pour masquer une frame perdue, donc chaque saccade se
+   voit. Tout ce qui suit respecte deux règles strictes.
+
+   1. Aucune animation ne touche une propriété de mise en page NI un filtre.
+      Un `filter: blur()` dont la valeur varie force le GPU à refaire une
+      passe de flou sur toute la surface du bloc à chaque frame ; une
+      translation ne coûte qu'une matrice sur le compositeur. C'est le poste
+      de dépense n°1 du scroll mobile, et le site en animait sur ses plus
+      grandes surfaces (dévoilements et titres).
+   2. Les effets liés au scroll passent par des variables CSS écrites depuis
+      l'ordonnanceur unique du site (une seule frame rAF partagée), jamais
+      depuis leur propre écouteur.
+   ========================================================================== */
+@media (max-width: 860px) {
+
+  /* ---- Le verre dépoli devient un verre teinté ----
+     `backdrop-filter` est de loin le poste le plus lourd du défilement
+     mobile : le GPU doit re-échantillonner et re-flouter TOUT ce qui se
+     trouve derrière l'élément à chaque frame, et le site en pose sur dix-
+     sept blocs. Or ici l'arrière-plan de ces blocs est le noir plat des
+     sections — flouter du noir uni ne produit rien de visible. On le
+     retire donc sur petit écran et on remonte légèrement l'opacité du
+     fond pour conserver exactement la même densité à l'œil.
+     Conservé en revanche là où il travaille vraiment sur une image :
+     boutons clairs du hero et cadre en verre de Contact. */
+  .glass {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background:
+      linear-gradient(155deg, rgba(255,255,255,.13), rgba(255,255,255,.03) 40%, rgba(255,255,255,.06) 100%),
+      rgba(255, 255, 255, .075);
+  }
+  .btn--glass {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(255, 255, 255, .12);
+  }
+
+  /* la parallaxe du visuel écrit dans `translate`, à annoncer avec le reste */
+  .project-card__zoom { will-change: transform, translate; }
+
+  /* ---- Contact : la texture de verre ne survit pas au recadrage mobile ----
+     glasses.webp est une image CARRÉE (900x900) posée en `cover`. Sur un
+     panneau large (desktop), le recadrage en garde une bande horizontale et
+     les reflets du verre se lisent comme une texture. Sur un panneau étroit
+     et haut (téléphone), `cover` n'en conserve qu'une mince bande verticale
+     très agrandie : les mêmes reflets s'étirent alors sur toute la largeur
+     et deviennent deux barres nettes, l'une sous le bord haut, l'autre au-
+     dessus du bord bas. Aucun réglage d'opacité ne les efface — ce sont des
+     arêtes, pas un dégradé.
+     On retire donc la photo ici et on garde le halo, qui est un dégradé
+     radial : lui se met à l'échelle sans jamais produire d'arête. Bonus :
+     ça supprime une image surdimensionnée en animation permanente, sur le
+     seul appareil où le compositeur est compté. */
+  .contact__bg { display: none; }
+
+  /* ---- Dévoilements : le flou saute, la montée se fait plus franche ---- */
+  [data-reveal] {
+    transform: translateY(38px);
+    filter: none;
+    transition: opacity .8s var(--ease), transform .8s var(--ease);
+  }
+
+  /* ---- Titres : dévoilement au masque plutôt qu'au flou ----
+     .tl-mask est déjà en overflow:hidden ; faire glisser la ligne depuis
+     sous son propre masque donne l'entrée typographique éditoriale, pour le
+     coût d'une seule translation — là où la version grand écran empile
+     blur(18px), rotation et changement d'échelle sur du très gros texte. */
+  [data-title-drop] .tl-mask__inner {
+    transform: translateY(110%);
+    opacity: 1;
+    filter: none;
+    transition: transform .95s var(--ease);
+  }
+  [data-title-drop]:not(.in-view) .title-lg .tl-mask__inner {
+    transform: translateY(110%);
+    filter: none;
+  }
+  [data-title-drop].in-view .tl-mask__inner { filter: none; }
+
+  /* l'etat revele laissait un filter: blur(0) : aucune animation, mais une
+     couche de filtre promue pour rien sur chaque bloc revele. */
+  [data-reveal].in-view { filter: none; }
+
+  /* ---- Cartes Compétences : les étiquettes arrivent après la carte ----
+     La carte seule apparaissait d'un bloc ; l'échelonnement interne donne
+     une seconde lecture au même dévoilement, sans un mouvement de plus à
+     l'échelle de la page. */
+  .service-card__tags li {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity .5s var(--ease), transform .5s var(--ease);
+  }
+  [data-svc].is-in .service-card__tags li { opacity: 1; transform: none; }
+  [data-svc].is-in .service-card__tags li:nth-child(1) { transition-delay: .20s; }
+  [data-svc].is-in .service-card__tags li:nth-child(2) { transition-delay: .28s; }
+  [data-svc].is-in .service-card__tags li:nth-child(3) { transition-delay: .36s; }
+  [data-svc].is-in .service-card__tags li:nth-child(4) { transition-delay: .44s; }
+
+  /* ---- Visuels de projets : marge de débordement pour la parallaxe ----
+     Le zoom de repos (1.02) ne laissait que deux pixels de rab sous le
+     cadre : insuffisant pour décaler l'image sans découvrir le fond. À
+     1.14, la parallaxe du JS dispose d'environ 17px de chaque côté.
+     Le survol qui poussait à 1.08 n'existe pas ici (pas de pointeur fin). */
+  .project-card__zoom { transform: scale(1.14); }
+
+  /* ---- Chiffres clés : la valeur monte pendant que le bloc arrive ---- */
+  .stats__num {
+    display: inline-block;
+    transform: translateY(12px);
+    opacity: 0;
+    transition: transform .7s var(--ease), opacity .7s var(--ease);
+    transition-delay: .18s;
+  }
+  .stats__item.in-view .stats__num { transform: none; opacity: 1; }
+}
+
+/* ---- Process : rail vertical qui se dessine au fil du scroll ----
+   Réservé à la colonne unique (<=560px), la seule disposition où les
+   quatre étapes se lisent réellement de haut en bas. Le trait de
+   progression est un scaleY piloté par --tl-progress, écrit par le JS :
+   une transformation, donc rien à recalculer pendant le défilement.
+   La puce de chaque étape s'allume quand son bloc est révélé. */
+@media (max-width: 560px) {
+  .timeline {
+    position: relative;
+    padding-left: 30px;
+  }
+  .timeline::before,
+  .timeline::after {
+    content: "";
+    position: absolute;
+    left: 8px;
+    top: 8px;
+    bottom: 8px;
+    width: 1px;
+    border-radius: 1px;
+  }
+  .timeline::before { background: rgba(255, 255, 255, .12); }
+  .timeline::after {
+    background: linear-gradient(to bottom, rgba(255,255,255,.85), rgba(255,255,255,.35));
+    transform: scaleY(var(--tl-progress, 0));
+    transform-origin: top center;
+    will-change: transform;
+  }
+  .timeline__item::before {
+    content: "";
+    position: absolute;
+    /* -25px place le centre de la puce (3.5px de rayon) a 8.5px du bord de
+       la liste, exactement sur l'axe du rail pose a left:8px. */
+    left: -25px;
+    top: 9px;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--white-faint);
+    transform: scale(.6);
+    transition: transform .5s var(--ease-glass), background .5s ease;
+  }
+  .timeline__item.in-view::before {
+    background: var(--white);
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stats__num { transform: none; opacity: 1; transition: none; }
+  .service-card__tags li { opacity: 1; transform: none; transition: none; }
+  .timeline::after { transform: scaleY(1); }
+  .timeline__item::before { transform: scale(1); }
+}
 
 @media (prefers-reduced-motion: reduce) {
   [data-reveal] { opacity: 1; transform: none; filter: none; transition: none; }

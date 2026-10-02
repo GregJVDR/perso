@@ -1,0 +1,7 @@
+# Les robots ne lisent ce fichier qu'à la racine d'un domaine. Publié sous
+# gregjvdr.github.io/perso/, il reste sans effet ; il prendra effet tel quel
+# si le site passe sur son propre nom de domaine (mettre alors l'URL à jour).
+User-agent: *
+Allow: /
+
+Sitemap: https://gregjvdr.github.io/perso/sitemap.xml

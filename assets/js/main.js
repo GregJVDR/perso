@@ -1,7 +1,8 @@
 (() => {
   "use strict";
 
-  // gate CSS "closed" panel states behind JS availability
+  // La classe "js" est posée dès le <head> (script en ligne) : ce fichier
+  // étant différé, l'attendre laissait voir un instant les états "ouverts".
   document.documentElement.classList.add("js");
 
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -39,7 +40,12 @@
   const preloader = document.getElementById("preloader");
   const preloaderFill = document.getElementById("preloaderFill");
   const navEl = document.getElementById("siteNav");
-  document.body.classList.add("is-loading");
+  // Déjà vu dans cette session (retour arrière, rechargement) : l'écran de
+  // chargement n'a plus rien à raconter, il ne fait que retarder la page.
+  // Le <head> a déjà posé .deja-vu, qui le masque avant le premier rendu.
+  const dejaVu = document.documentElement.classList.contains("deja-vu");
+  try { sessionStorage.setItem("gj-vu", "1"); } catch (e) {}
+  if (!dejaVu) document.body.classList.add("is-loading");
   const preloaderStart = performance.now();
 
   // Durée minimale d'affichage du préchargeur : sur un chargement rapide
@@ -47,7 +53,9 @@
   // et couperait l'animation des lettres GJ en plein milieu. On garantit
   // qu'elle a toujours le temps de se jouer, sans jamais RALENTIR un
   // chargement réellement plus long que ce plancher.
-  const PRELOADER_MIN_MS = 2000;
+  // 1,3 s : l'entrée des lettres a été resserrée d'autant (voir la CSS) pour
+  // se jouer en entier. L'ancien plancher de 2 s s'imposait à chaque visite.
+  const PRELOADER_MIN_MS = dejaVu || reduceMotion ? 0 : 1300;
 
   // Callback optionnel posé plus bas dans le script (entrée du nom du
   // hero) : ne PEUT pas s'exécuter tant que le préchargeur n'est pas fini,
@@ -64,6 +72,13 @@
     if (onPreloaderDone) onPreloaderDone();
   };
 
+  if (dejaVu) {
+    preloader.classList.add("is-done");
+    document.body.classList.add("is-ready");
+    // différé : le reste du script doit d'abord avoir posé onPreloaderDone
+    setTimeout(revealNav, 60);
+  }
+
   let fake = 0;
   const fakeLoad = setInterval(() => {
     fake += Math.random() * 18;
@@ -73,6 +88,7 @@
 
   window.addEventListener("load", () => {
     clearInterval(fakeLoad);
+    if (dejaVu) return;
     preloaderFill.style.width = "100%";
     const elapsed = performance.now() - preloaderStart;
     const remaining = Math.max(PRELOADER_MIN_MS - elapsed, 350);
@@ -85,7 +101,8 @@
   });
 
   // Safety net in case 'load' never fires quickly
-  setTimeout(() => {
+  if (dejaVu) clearInterval(fakeLoad);
+  else setTimeout(() => {
     if (!document.body.classList.contains("is-ready")) {
       clearInterval(fakeLoad);
       preloader.classList.add("is-done");
@@ -151,10 +168,19 @@
   const domainsCylinder = document.querySelector(".domains__cylinder");
   const domainItems = Array.from(document.querySelectorAll(".domains__item"));
   if (domainsSection && domainsCylinder && domainItems.length && !reduceMotion) {
-    const STEP_DEG = 9; // écart angulaire entre deux mots consécutifs sur le tambour
-    const FADE_RANGE_DEG = STEP_DEG * 5; // distance angulaire au bout de laquelle un mot est quasi invisible
+    // Écart angulaire entre deux mots consécutifs sur le tambour. C'est lui
+    // qui fixe leur espacement vertical (sin(step) x rayon), et il doit suivre
+    // la taille du texte : sous 860px la CSS descend celle-ci à ~40% de sa
+    // valeur grand écran, alors que le rayon reste proportionnel à l'écran.
+    // Les mots se retrouvaient espacés de ~3,2 fois leur hauteur contre ~1,9
+    // sur grand écran — d'où la sensation de vide entre eux. On resserre
+    // l'angle d'autant, ce qui laisse rayon, perspective et loupe (1,67x)
+    // strictement inchangés. Le seuil vient de la media query correspondante.
+    const STEP_DEG_LARGE = 9;
+    const STEP_DEG_ETROIT = 5.5;
+    const ETROIT_MAX_PX = 860;
+    let stepDeg = STEP_DEG_LARGE;
     const MIN_OPACITY = 0.08;
-    const ACTIVE_THRESHOLD_DEG = STEP_DEG / 2;
 
     const domainsSticky = document.querySelector(".domains__sticky");
     let radius = 0;
@@ -165,6 +191,8 @@
     let stickyTop = 0;
     let stickyHeight = 0;
     const layout = () => {
+      stepDeg =
+        window.innerWidth <= ETROIT_MAX_PX ? STEP_DEG_ETROIT : STEP_DEG_LARGE;
       // Rayon et perspective doivent rester dans un rapport constant de 2.5
       // (voir .domains__sticky) : c'est lui qui fixe le grossissement du mot
       // le plus proche, à 1.67× sur tous les écrans. Les deux axes sont
@@ -175,7 +203,7 @@
       stickyTop = parseFloat(getComputedStyle(domainsSticky).top) || 0;
       stickyHeight = domainsSticky.offsetHeight;
       domainItems.forEach((el, i) => {
-        const angleDeg = i * STEP_DEG;
+        const angleDeg = i * stepDeg;
         const angleRad = (angleDeg * Math.PI) / 180;
         const ty = Math.sin(angleRad) * radius;
         const tz = Math.cos(angleRad) * radius;
@@ -191,14 +219,20 @@
         scrollable > 0
           ? Math.min(Math.max((stickyTop - rect.top) / scrollable, 0), 1)
           : 0;
-      const wrapRotation = progress * (domainItems.length - 1) * STEP_DEG;
+      const wrapRotation = progress * (domainItems.length - 1) * stepDeg;
 
       domainsCylinder.style.transform = `translate3d(-50%, -50%, 0) rotateX(${wrapRotation.toFixed(2)}deg)`;
 
+      // Seuils dérivés de l'angle courant, pas de constantes figées : sinon
+      // resserrer le tambour sur téléphone aurait élargi la fenêtre de fondu
+      // à bien plus de cinq mots, et le mot actif serait resté marqué sur
+      // près de deux crans.
+      const fadeRangeDeg = stepDeg * 5;
+      const activeThresholdDeg = stepDeg / 2;
       domainItems.forEach((el, i) => {
-        const dist = Math.abs(i * STEP_DEG - wrapRotation);
-        el.classList.toggle("is-active", dist < ACTIVE_THRESHOLD_DEG);
-        const fade = Math.max(0, 1 - dist / FADE_RANGE_DEG);
+        const dist = Math.abs(i * stepDeg - wrapRotation);
+        el.classList.toggle("is-active", dist < activeThresholdDeg);
+        const fade = Math.max(0, 1 - dist / fadeRangeDeg);
         el.style.opacity = Math.max(MIN_OPACITY, fade).toFixed(3);
       });
     };
@@ -320,22 +354,6 @@
       { threshold: 0.5 }
     );
     counters.forEach((el) => ioCount.observe(el));
-  }
-
-  /* ---------------- Liquid skill bars ----------------
-     Se remplit/se vide à chaque passage ; la transition CSS existante sur
-     .skillbar__fill gère l'animation dans les deux sens. */
-  const bars = document.querySelectorAll("[data-fill]");
-  if ("IntersectionObserver" in window) {
-    const ioBars = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          entry.target.style.width = entry.isIntersecting ? entry.target.dataset.fill + "%" : "0%";
-        });
-      },
-      { threshold: 0.4 }
-    );
-    bars.forEach((el) => ioBars.observe(el));
   }
 
   /* ---------------- Scroll progress bar ---------------- */
@@ -464,21 +482,55 @@
     moveIndicator(activeInitial);
   }, 700);
 
-  /* ---------------- Mobile menu ---------------- */
+  /* ---------------- Mobile menu ----------------
+     Fermé, le menu est `inert` : hors de la tabulation et de l'arbre
+     d'accessibilité (il était invisible mais atteignable au clavier).
+     Ouvert, le focus y entre et y reste — bouton burger compris, pour
+     pouvoir le refermer — et Échap, un clic sur le voile ou le passage en
+     largeur bureau le referment. */
   const burger = document.getElementById("navBurger");
   const mobileMenu = document.getElementById("mobileMenu");
   if (burger && mobileMenu) {
-    burger.addEventListener("click", () => {
-      const isOpen = mobileMenu.classList.toggle("is-open");
-      burger.setAttribute("aria-expanded", String(isOpen));
-      burger.setAttribute("aria-label", isOpen ? "Fermer le menu" : "Ouvrir le menu");
+    const estOuvert = () => mobileMenu.classList.contains("is-open");
+    const ouvrir = () => {
+      mobileMenu.inert = false;
+      mobileMenu.classList.add("is-open");
+      burger.setAttribute("aria-expanded", "true");
+      burger.setAttribute("aria-label", "Fermer le menu");
+      const premier = mobileMenu.querySelector("a");
+      if (premier) requestAnimationFrame(() => premier.focus({ preventScroll: true }));
+    };
+    const fermer = (rendreLeFocus) => {
+      if (!estOuvert()) return;
+      mobileMenu.classList.remove("is-open");
+      mobileMenu.inert = true;
+      burger.setAttribute("aria-expanded", "false");
+      burger.setAttribute("aria-label", "Ouvrir le menu");
+      if (rendreLeFocus) burger.focus({ preventScroll: true });
+    };
+    burger.addEventListener("click", () => (estOuvert() ? fermer(false) : ouvrir()));
+    mobileMenu.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => fermer(false)));
+    document.addEventListener("keydown", (e) => {
+      if (!estOuvert()) return;
+      if (e.key === "Escape") {
+        e.preventDefault();
+        fermer(true);
+        return;
+      }
+      if (e.key !== "Tab") return;
+      // boucle de tabulation : burger -> liens du menu -> burger
+      const arrets = [burger, ...mobileMenu.querySelectorAll("a")];
+      const i = arrets.indexOf(document.activeElement);
+      const suivant = e.shiftKey ? (i <= 0 ? arrets.length - 1 : i - 1) : (i === arrets.length - 1 ? 0 : i + 1);
+      e.preventDefault();
+      arrets[suivant].focus();
     });
-    mobileMenu.querySelectorAll("a").forEach((a) =>
-      a.addEventListener("click", () => {
-        mobileMenu.classList.remove("is-open");
-        burger.setAttribute("aria-expanded", "false");
-      })
-    );
+    document.addEventListener("pointerdown", (e) => {
+      if (estOuvert() && !mobileMenu.contains(e.target) && !burger.contains(e.target)) fermer(false);
+    });
+    window.matchMedia("(max-width: 900px)").addEventListener("change", (e) => {
+      if (!e.matches) fermer(false);
+    });
   }
 
 
@@ -611,16 +663,45 @@
       svcCards.forEach((card) => card.classList.remove("is-in"));
     };
     if ("IntersectionObserver" in window && !reduceMotion) {
-      const ioSvc = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) playSvcIn();
-            else playSvcOut();
-          });
-        },
-        { threshold: 0.3 }
-      );
-      ioSvc.observe(svcGrid);
+      // Sur petit écran la grille passe en colonne unique : la hauteur des
+      // quatre cartes dépasse largement l'écran, et observer la GRILLE
+      // déclenchait la cascade entière dès que 30% d'entre elles étaient
+      // visibles — les trois dernières jouaient leur entrée hors champ, et
+      // on ne trouvait plus que des cartes déjà posées en arrivant dessus.
+      // On observe donc chaque carte pour elle-même : chacune s'anime au
+      // moment où on l'atteint, et l'échelonnement vient naturellement du
+      // défilement. Sur grand écran les quatre tiennent ensemble à l'écran,
+      // la cascade chronométrée y garde tout son sens.
+      const mqEtroitSvc = window.matchMedia("(max-width: 860px)");
+      let ioSvc = null;
+      const brancherSvc = () => {
+        if (ioSvc) ioSvc.disconnect();
+        clearSvcTimers();
+        if (mqEtroitSvc.matches) {
+          ioSvc = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                entry.target.classList.toggle("is-in", entry.isIntersecting);
+              });
+            },
+            { threshold: 0.25, rootMargin: "0px 0px -10% 0px" }
+          );
+          svcCards.forEach((card) => ioSvc.observe(card));
+        } else {
+          ioSvc = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting) playSvcIn();
+                else playSvcOut();
+              });
+            },
+            { threshold: 0.3 }
+          );
+          ioSvc.observe(svcGrid);
+        }
+      };
+      brancherSvc();
+      mqEtroitSvc.addEventListener("change", brancherSvc);
     } else {
       svcCards.forEach((card) => card.classList.add("is-in"));
     }
@@ -704,8 +785,10 @@
 
     let loopId = null;
     const loop = () => {
-      ringX += (mouseX - ringX) * 0.16;
-      ringY += (mouseY - ringY) * 0.16;
+      // Suivi resserré (0.16 -> 0.24) : l'anneau colle davantage au pointeur.
+      // La traîne longue faisait partie de ce qui rendait le curseur voyant.
+      ringX += (mouseX - ringX) * 0.24;
+      ringY += (mouseY - ringY) * 0.24;
       place(ring, ringX, ringY);
       // La boucle tournait indéfiniment, y compris souris immobile et anneau
       // déjà arrivé. On l'arrête une fois l'écart négligeable ; le prochain
@@ -833,6 +916,13 @@
         // synchrone, soit des dizaines de layouts par seconde pendant tout le
         // survol — la principale source du retard ressenti.
         rect = card.getBoundingClientRect();
+        // Les cascades d'entrée (.services__grid / .projects__grid nth-child)
+        // posent un transition-delay qui n'est jamais retiré : il retardait
+        // aussi le basculement au survol, d'où les cartes 2 à 4 qui traînaient
+        // derrière le curseur quand la première suivait tout de suite. On le
+        // neutralise en inline — l'entrée a déjà joué à ce stade, et le style
+        // inline passe devant toutes les règles CSS, survol comme retour.
+        card.style.transitionDelay = "0s";
         // .is-tilting n'est PAS posée tout de suite : elle coupe la transition,
         // et la carte basculerait alors d'un coup sous le pointeur dès la
         // première frame. On laisse d'abord la transition CSS amener
@@ -863,4 +953,214 @@
       });
     });
   }
+
+  /* ==================================================================
+     MOUVEMENT MOBILE
+     Effets réservés au petit écran. Trois d'entre eux sont "liés au
+     scroll" : leur valeur suit la position de défilement au lieu de se
+     jouer une fois. Ils s'abonnent tous à l'ordonnanceur unique déclaré
+     en haut du fichier — une seule frame rAF partagée par tout le site —
+     et n'écrivent que des transformations, jamais de propriété de mise
+     en page.
+     ================================================================== */
+  const mqEtroit = window.matchMedia("(max-width: 860px)");
+  const mqColonne = window.matchMedia("(max-width: 560px)");
+
+  /* ---------------- Process : le rail se dessine au fil de la lecture ----
+     --tl-progress pilote un scaleY (voir la couche mobile de la CSS). La
+     référence est la ligne de lecture aux deux tiers de l'écran, pas le
+     bord : le trait avance donc au rythme de l'étape qu'on est en train
+     de lire, et non de celle qui pointe tout juste en bas. */
+  const timeline = document.querySelector(".timeline");
+  if (timeline && !reduceMotion) {
+    const majTimeline = () => {
+      if (!mqColonne.matches) {
+        timeline.style.removeProperty("--tl-progress");
+        return;
+      }
+      const r = timeline.getBoundingClientRect();
+      if (r.height <= 0) return;
+      const ligneDeLecture = window.innerHeight * 0.66;
+      const p = (ligneDeLecture - r.top) / r.height;
+      timeline.style.setProperty(
+        "--tl-progress",
+        Math.min(Math.max(p, 0), 1).toFixed(4)
+      );
+    };
+    onScrollFrame(majTimeline);
+    majTimeline();
+  }
+
+  /* ---------------- Visuels de projets : parallaxe dans le cadre ----
+     L'image dérive à contresens du défilement à l'intérieur de son cadre,
+     qui lui ne bouge pas — le cadrage vit pendant qu'on fait défiler.
+     Écrit dans `translate` (propriété indépendante) et non dans
+     `transform` : ce dernier porte déjà le zoom de repos, et `scale` porte
+     le dévoilement. Les trois se composent sans se marcher dessus.
+     La marge de débordement nécessaire vient du scale(1.14) mobile. */
+  const zoomsProjets = Array.from(document.querySelectorAll(".project-card__zoom"));
+  if (zoomsProjets.length && !reduceMotion) {
+    const AMPLITUDE_PX = 15;
+    let horsEcran = false;
+    const majZooms = () => {
+      if (!mqEtroit.matches) {
+        if (!horsEcran) {
+          zoomsProjets.forEach((z) => z.style.removeProperty("translate"));
+          horsEcran = true;
+        }
+        return;
+      }
+      horsEcran = false;
+      const vh = window.innerHeight;
+      for (let i = 0; i < zoomsProjets.length; i++) {
+        const z = zoomsProjets[i];
+        const r = z.getBoundingClientRect();
+        // hors champ : on ne paie ni le calcul ni l'écriture de style
+        if (r.bottom < 0 || r.top > vh) continue;
+        // -1 quand le cadre est en bas de l'écran, +1 quand il est en haut
+        const p = (r.top + r.height / 2 - vh / 2) / vh;
+        z.style.translate = `0 ${(-p * AMPLITUDE_PX).toFixed(1)}px`;
+      }
+    };
+    onScrollFrame(majZooms);
+    majZooms();
+  }
+
+  /* ---------------- Bandeau défilant : entraîné par le scroll ----
+     Le bandeau tourne déjà en boucle par une animation CSS. On lui ajoute
+     un décalage proportionnel à la VITESSE de défilement, qui retombe
+     ensuite par frottement — le ruban se fait tirer quand on scrolle vite
+     puis se remet en place. Là encore `translate` et non `transform`, qui
+     est occupé par l'animation de la boucle.
+     La décroissance a sa propre boucle rAF, qui s'arrête d'elle-même une
+     fois le décalage résorbé : rien ne tourne à l'arrêt. */
+  const ruban = document.querySelector(".marquee__track");
+  if (ruban && !reduceMotion) {
+    const DECALAGE_MAX = 55;
+    const REPRISE = 0.6; // part de la vitesse de scroll convertie en décalage
+    const FROTTEMENT = 0.86;
+    let dernierY = window.scrollY;
+    let decalage = 0;
+    let boucle = null;
+    const poser = () => {
+      ruban.style.translate = decalage.toFixed(1) + "px";
+    };
+    const decroitre = () => {
+      decalage *= FROTTEMENT;
+      if (Math.abs(decalage) < 0.3) {
+        decalage = 0;
+        poser();
+        boucle = null;
+        return;
+      }
+      poser();
+      boucle = requestAnimationFrame(decroitre);
+    };
+    onScrollFrame(() => {
+      const y = window.scrollY;
+      const delta = y - dernierY;
+      dernierY = y;
+      if (!mqEtroit.matches) {
+        if (decalage !== 0) {
+          decalage = 0;
+          poser();
+        }
+        return;
+      }
+      decalage = Math.max(
+        -DECALAGE_MAX,
+        Math.min(DECALAGE_MAX, decalage - delta * REPRISE)
+      );
+      poser();
+      if (boucle === null) boucle = requestAnimationFrame(decroitre);
+    });
+  }
+
+
+  /* ---------------- Hero : lumière dans le verre du portrait ----------------
+     Au pointeur, un reflet suit la souris et la photo glisse de quelques
+     pixels en sens inverse, comme vue à travers une lentille. Au doigt (pas
+     de survol possible), le reflet glisse avec le défilement. Deux variables
+     CSS, un rAF au plus par frame, aucune mesure en continu. */
+  const heroPortrait = document.querySelector(".hero__portrait");
+  if (heroPortrait && !reduceMotion) {
+    if (isFinePointer) {
+      let rect = null;
+      let raf = null;
+      let px = 0.3;
+      let py = 0.2;
+      const poser = () => {
+        raf = null;
+        heroPortrait.style.setProperty("--gx", (px * 100).toFixed(1) + "%");
+        heroPortrait.style.setProperty("--gy", (py * 100).toFixed(1) + "%");
+        heroPortrait.style.setProperty("--rx", ((0.5 - px) * 18).toFixed(1));
+        heroPortrait.style.setProperty("--ry", ((0.5 - py) * 10).toFixed(1));
+      };
+      heroPortrait.addEventListener("pointerenter", () => {
+        rect = heroPortrait.getBoundingClientRect();
+        heroPortrait.classList.add("is-lit");
+      });
+      heroPortrait.addEventListener("pointermove", (e) => {
+        if (!rect) rect = heroPortrait.getBoundingClientRect();
+        px = Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1);
+        py = Math.min(Math.max((e.clientY - rect.top) / rect.height, 0), 1);
+        if (raf === null) raf = requestAnimationFrame(poser);
+      });
+      heroPortrait.addEventListener("pointerleave", () => {
+        rect = null;
+        heroPortrait.classList.remove("is-lit");
+      });
+    } else {
+      heroPortrait.classList.add("is-lit");
+      const majReflet = () => {
+        const p = Math.min(Math.max(window.scrollY / window.innerHeight, 0), 1);
+        heroPortrait.style.setProperty("--gx", (18 + p * 64).toFixed(1) + "%");
+        heroPortrait.style.setProperty("--gy", (12 + p * 58).toFixed(1) + "%");
+      };
+      onScrollFrame(majReflet);
+      majReflet();
+    }
+  }
+
+  /* ---------------- Contact : copier l'adresse ----------------
+     Sans client mail configuré, un lien mailto ne fait rien. Retour visuel
+     sur le bouton, et annonce aux lecteurs d'écran via une zone live. */
+  const statutCopie = document.getElementById("copyStatus");
+  document.querySelectorAll("[data-copy]").forEach((bouton) => {
+    const libelle = bouton.querySelector(".contact__copy-label") || bouton;
+    const libelleInitial = libelle.textContent;
+    let minuterie = null;
+    bouton.addEventListener("click", async () => {
+      const texte = bouton.dataset.copy;
+      let copie = false;
+      try {
+        await navigator.clipboard.writeText(texte);
+        copie = true;
+      } catch (e) {
+        // presse-papiers indisponible (page non sécurisée, refus) : repli
+        const champ = document.createElement("textarea");
+        champ.value = texte;
+        champ.setAttribute("readonly", "");
+        champ.style.cssText = "position:fixed;opacity:0;pointer-events:none";
+        document.body.appendChild(champ);
+        champ.select();
+        try { copie = document.execCommand("copy"); } catch (err) {}
+        champ.remove();
+      }
+      libelle.textContent = copie ? "Adresse copiée" : texte;
+      bouton.classList.toggle("is-copied", copie);
+      if (statutCopie) {
+        statutCopie.textContent = copie
+          ? "Adresse e-mail copiée dans le presse-papiers."
+          : "Copie impossible. Adresse : " + texte;
+      }
+      clearTimeout(minuterie);
+      minuterie = setTimeout(() => {
+        libelle.textContent = libelleInitial;
+        bouton.classList.remove("is-copied");
+        if (statutCopie) statutCopie.textContent = "";
+      }, 2600);
+    });
+  });
+
 })();
